@@ -1,0 +1,6 @@
+"AddonInfo"
+{
+	"name" "GLMVS"
+	"author_name" "ptown2"
+	"info" "A globalized vote map system add-on for every server owner to use."
+}
