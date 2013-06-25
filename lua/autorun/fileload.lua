@@ -1,4 +1,6 @@
-module( "Loader", package.seeall )
+GAME, LANG = {}, {}
+
+module( "GLoader", package.seeall )
 
 local function GetFileList( strDirectory )
 	local files = {}
@@ -28,15 +30,18 @@ local function LoadFile( strDirectory, strFile )
 
 	if ( prefix == "cl_" || strFile == "cl_init.lua" ) then
 		if SERVER then AddCSLuaFile( realFile ) else include( realFile ) end
+		return
 	elseif ( prefix == "sh_" || strFile == "shared.lua" ) then
 		if SERVER then AddCSLuaFile( realFile ) end
 		include( realFile )
+		return
 	elseif ( prefix == "sv_" || strFile == "init.lua" ) then
 		if SERVER then include( realFile ) end
-	else
-		AddCSLuaFile( realFile )
-		include( realFile )
+		return
 	end
+
+	AddCSLuaFile( realFile )
+	include( realFile )
 end
 
 function RegisterLuaFolder( strDirectory )
@@ -62,8 +67,8 @@ function RegisterGamemodes( strDirectory )
 			LoadFile( strDirectory, filen )
 
 			if ( GAME.Name && GAME.ID ) then
-				GAMEMODES[GAME.ID] = GAME
-				GAMEMODES[GAME.Name] = GAME
+				GLMVS.Gamemodes[GAME.ID] = GAME
+				GLMVS.Gamemodes[GAME.Name] = GAME
 			end
 
 			included[filen] = GAME
@@ -73,5 +78,5 @@ function RegisterGamemodes( strDirectory )
 end
 
 function RegisterLanguages( strDirectory )
-	-- Not done
+	local LANG = {}
 end

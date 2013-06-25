@@ -1,14 +1,23 @@
-module( "Map", package.seeall )
+module( "GLMVS", package.seeall )
+
+// Shared Global Vars
+Maplist		= {}
+Maplib		= {}
+Gamemodes	= {}
+
+// Shared Setting Vars
+GLVersion	= "1.0.0"
+CurrentMap	= string.lower( game.GetMap() )
 
 function AddMap( map, plnum )
 	if IsNonExistantMap( map ) then return end
 
 	if SERVER then
-		table.insert( MAPLIST, { Map = map, MinPlayers = 0, Locked = false } )
+		table.insert( Maplist, { Map = map, MinPlayers = 0, Locked = false } )
 	end
 	
 	if CLIENT then
-		table.insert( MAPLIST, { Map = map, Name = "", Description = "", MinPlayers = plnum, Locked = false } )
+		table.insert( Maplist, { Map = map, Name = "", Description = "", MinPlayers = plnum, Locked = false } )
 	end
 end
 

@@ -1,47 +1,83 @@
 local VoteFrame = nil
 
+local texCorner = surface.GetTextureID("zombiesurvival/circlegradient")
+local texUpEdge = surface.GetTextureID("gui/gradient_up")
+local texDownEdge = surface.GetTextureID("gui/gradient_down")
+local texRightEdge = surface.GetTextureID("gui/gradient")
+
 local function LowestSizeMult( factor, size )
-	return math.floor( factor / size ) - 1
+	return math.floor( ( factor / size ) - 1 )
+end
+
+local function Sizeto720p( size, src )
+	return math.floor( size * ( src / 720 ) )
+end
+
+local function CreateFonts()
+	surface.CreateFont( "VoteTitle" , { font = "Bebas Neue", size = Sizeto720p( 54, ScrH() ), weight = 1000 })
+end
+
+local function GenericImgButton( self )
+	local c, alpha = Color( 255, 255, 0, 255 ), 255
+
+	if ( self.Hovered ) then
+		alpha = 205
+
+		if ( self.Depressed ) then
+			c = Color( 255, 0, 0, 255 )
+		end
+
+		surface.SetDrawColor( Color( c.r, c.g, c.b, alpha ) )
+		surface.SetMaterial( Material( self.Image, "alphatest" ) )
+		surface.DrawTexturedRect( 0, 0, self:GetWide() - 0 , self:GetTall() - 0 )
+	end
+
+	local c = color_white
+	surface.SetDrawColor( Color( c.r, c.g, c.b, alpha ) )
+	surface.SetMaterial( Material( self.Image, "smooth mips" ) )
+	surface.DrawTexturedRect( 3, 3, self:GetWide() - 6 , self:GetTall() - 6 )
 end
 
 function Derma_Votemap()
 	if IsValid( VoteFrame ) then return end
-	
+
+	CreateFonts()
+
 	local w, h = ScrW(), ScrH()
-	local imapsize = 150
-	local spacingx, spacingy = 5, 5
+	local imapsize, globalspacing = Sizeto720p( 150, h ), Sizeto720p( 8, h )
 	local numframesw, numframesh = LowestSizeMult( w, imapsize ), LowestSizeMult( h, imapsize )
-	
-	VoteFrame = vgui.Create("DPanel")
-	VoteFrame:SetSize( ( numframesw * spacingx ) + ( numframesw * imapsize ) + 35, ( numframesh * spacingy ) + ( numframesh * imapsize ) + 75 )
-	--VoteFrame:SetTitle( " " )
-	--VoteFrame:ShowCloseButton( true )
+
+	VoteFrame = vgui.Create("DFrame")
+	VoteFrame:SetTitle( " " )
+	VoteFrame:SetSize( ( numframesw * globalspacing ) + ( numframesw * imapsize ) + 35, ( numframesh * globalspacing ) + ( numframesh * imapsize ) + ( draw.GetFontHeight( "VoteTitle" ) ) + 20 )
+	VoteFrame:SetSkin( "zsvotemap" )
+	VoteFrame:SetPaintShadow( color_black )
 	VoteFrame:Center()
-	
-	ScrlFrame = vgui.Create( "DScrollPanel", VoteFrame )
-	ScrlFrame:SetSize( ( numframesw * spacingx ) + ( numframesw * imapsize ) + 15, ( numframesh * spacingy ) + ( numframesh * imapsize ) - 3 )
+
+	local TitleLabel = vgui.Create( "DLabel", VoteFrame )
+	TitleLabel:SetFont( "VoteTitle" )
+	TitleLabel:SetColor( color_white )
+	TitleLabel:SetText( "Vote for a map!" )
+	TitleLabel:SizeToContents()
+	TitleLabel:CenterHorizontal()
+	TitleLabel:AlignTop( 10 )
+
+	local ScrlFrame = vgui.Create( "DScrollPanel", VoteFrame )
+	ScrlFrame:SetSize( ( numframesw * globalspacing ) + ( numframesw * imapsize ) - globalspacing, ( numframesh * globalspacing ) + ( numframesh * imapsize ) - 3 )
 	ScrlFrame:CenterHorizontal()
 	ScrlFrame:AlignBottom( 10 )
-	
-	ListFrame = vgui.Create( "DIconLayout", ScrlFrame )
+
+	local ListFrame = vgui.Create( "DIconLayout", ScrlFrame )
 	ListFrame:SetSize( ScrlFrame:GetWide(), ScrlFrame:GetTall() )
-	ListFrame:SetSpaceX( spacingx )
-	ListFrame:SetSpaceY( spacingy )
+	ListFrame:SetSpaceX( globalspacing )
+	ListFrame:SetSpaceY( globalspacing )
 
-	for i = 1, 7 * 6 do
-		local ListItem = ListFrame:Add( "DPanel" )
+	for _, info in pairs( GLMVS.Maplist ) do
+		local ListItem = ListFrame:Add( "DButton" )
 		ListItem:SetSize( imapsize, imapsize )
-	end
-
-	CloseFrame = vgui.Create( "DButton", VoteFrame )
-	CloseFrame:SetText( "X" )
-	CloseFrame:SetSize( 20, 20 )
-	CloseFrame:AlignRight( 10 )
-	CloseFrame:AlignTop( 10 )
-	CloseFrame.DoClick = function( self )
-		if IsValid( VoteFrame ) then
-			VoteFrame:Remove()
-		end
+		ListItem:SetText( " " )
+		ListItem.Image = "../maps/" .. info.Map .. ".png"
+		ListItem.Paint = GenericImgButton
 	end
 
 	VoteFrame:MakePopup()
