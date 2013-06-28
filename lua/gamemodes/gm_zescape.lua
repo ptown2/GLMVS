@@ -1,3 +1,5 @@
+local GAME = {}
+
 GAME.ID			= "zombieescape"
 GAME.Name		= "Zombie Escape"
 GAME.MapPrefix	= {"ze"}
@@ -21,11 +23,7 @@ end
 function GAME:GetPlayerVote( pl )
 	local votes = 0
 
-	/*
-	if IsValid(pl) then
-		votes = votes + ( pl.ZombiesKilled or 0 )
-	end
-	*/
-
 	return math.ceil(votes / 5)
 end
+
+GLoader.RegisterGamemode( GAME )

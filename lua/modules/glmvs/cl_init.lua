@@ -3,12 +3,7 @@ module( "GLMVS", package.seeall )
 net.Receive( "GLMVS_ReceiveVotes", function( pl, len )
 	local mapid, votes = net.ReadInt( 32 ), net.ReadInt( 32 )
 
-	for id, info in pairs( GLMVS.Maplist ) do
-		if ( info.ID == mapid ) then
-			GLMVS.Maplist[ id ].Votes = GLMVS.Maplist[ id ].Votes + votes
-			break
-		end
-	end
+	GLMVS.Maplist[ mapid ].Votes = GLMVS.Maplist[ mapid ].Votes + votes
 end )
 
 function Votemap( self )
@@ -24,7 +19,7 @@ end
 function GenericImgButton( self )
 	local IsLocked = self:GetDisabled()
 	local c, alpha = color_white, 255
-	local mapid = self.ID
+	local mapid = self.MapID
 
 	if ( self.Hovered ) then alpha = 185 end
 	if ( self.Depressed ) then c = Color( 150, 255, 150 ) end
@@ -35,7 +30,7 @@ function GenericImgButton( self )
 	surface.DrawTexturedRect( 0, 0, self:GetWide() , self:GetTall() )
 
 	if ( IsLocked ) then
-		local iconmult = 0.47
+		local iconmult = 0.45
 
 		surface.SetDrawColor( color_white )
 		surface.SetMaterial( Material( "icon128/padlock.png", "smooth" ) )

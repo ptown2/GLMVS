@@ -1,6 +1,8 @@
+local GAME = {}
+
 GAME.ID			= "zombiesurvival"
 GAME.Name		= "Zombie Survival"
-GAME.MapPrefix	= {"zs", "zm", "zh", "zps", "zr", "ze"}
+GAME.MapPrefix	= {"gm", "zs", "zm", "zh", "zps", "zr", "ze"}
 GAME.MapFileDB	= "map_zombiesurvival"
 
 GAME.HookEnd	= "EndRound"
@@ -14,11 +16,11 @@ function GAME:ShouldRestartRound()
 	return GAMEMODE:ShouldRestartRound()
 end
 
-function GAME:GetPlayerVote(pl)
+function GAME:GetPlayerVote( pl )
 	local ct = CurTime()
 	local votes = 0
 
-	if IsValid(pl) then
+	if IsValid( pl ) then
 		votes = votes + ((pl.ZombiesKilled or 0) / 5)
 		votes = votes + ((pl.ZombiesKilledAssists or 0) / 2)
 		votes = votes + ((pl.BrainsEaten or 0) * 2)
@@ -46,3 +48,5 @@ function GAME:GetPlayerVote(pl)
 
 	return math.ceil(votes / 5)
 end
+
+GLoader.RegisterGamemode( GAME )

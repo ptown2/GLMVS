@@ -1,3 +1,5 @@
+local GAME = {}
+
 -- This one will not work until the creator of this gamemode adds the line to call the hooks.
 GAME.ID			= "stalker"
 GAME.Name		= "The Stalker"
@@ -27,3 +29,5 @@ function GAME:ShouldRestartRound()
 	end
 	return true
 end
+
+GLoader.RegisterGamemode( GAME )

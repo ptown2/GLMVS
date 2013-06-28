@@ -12,20 +12,31 @@ GLVersion	= "1.0.0.3"
 CurrentMap	= string.lower( game.GetMap() )
 
 function AddMap( map, plnum )
-	local CurGamemode = GLMVS.ReturnCurGamemode()
 	local isLocked = ( CurrentMap == string.lower( map ) ) && 1 || 0
 
-	if CurGamemode then
-		if !table.HasValue( CurGamemode.MapPrefix, string.Explode( "_", map )[ 1 ] ) then return end
-	end
-
 	if SERVER then
-		table.insert( Maplist, { Map = string.lower( map ), Votes = 0, MinPlayers = plnum, Locked = isLocked } )
+		local CurGamemode = GLMVS.ReturnCurGamemode()
+		if CurGamemode then
+			if !table.HasValue( CurGamemode.MapPrefix, string.Explode( "_", map )[ 1 ] ) then return end
+		end
+
+		table.insert( Maplist, { Map = string.lower( map ), Votes = 0, Name = nil, MinPlayers = plnum, Locked = isLocked } )
 	end
 
 	if CLIENT then
-		table.insert( Maplist, { Map = string.lower( map ), Votes = 0, Name = nil, Author = nil, Description = nil, MinPlayers = plnum, Locked = isLocked } )
+		-- WHAT THE FUCK!!!
+		hook.Add( "InitPostEntity", "AddMap" ..map, function()
+			local CurGamemode = GLMVS.ReturnCurGamemode()
+			if CurGamemode then
+				if !table.HasValue( CurGamemode.MapPrefix, string.Explode( "_", map )[ 1 ] ) then return end
+			end
+
+			table.insert( Maplist, { Map = string.lower( map ), Votes = 0, Name = nil, Author = nil, Description = nil, MinPlayers = plnum, Locked = isLocked } )
+			table.sort( GLMVS.Maplist, GLMVS.SortMaps )
+		end )
 	end
+
+	table.sort( GLMVS.Maplist, GLMVS.SortMaps )
 end
 
 function AddVote( pl, mapid, votes )
@@ -60,16 +71,16 @@ end
 function ReturnCurGamemode()
 	local gameconvar = GetConVar("gamemode"):GetString()
 
-	if ( gameconvar && Gamemodes[ gameconvar ] ) then
-		return Gamemodes[ gameconvar ]
+	if ( gameconvar && GLMVS.Gamemodes[ gameconvar ] ) then
+		return GLMVS.Gamemodes[ gameconvar ]
 	end
 
 	if ( GAMEMODE && GAMEMODE.Name ) then
-		return Gamemodes[ GAMEMODE.Name ]
+		return GLMVS.Gamemodes[ GAMEMODE.Name ]
 	end
 
 	if ( GM && GM.Name ) then
-		return Gamemodes[ GM.Name ]
+		return GLMVS.Gamemodes[ GM.Name ]
 	end
 
 	return nil

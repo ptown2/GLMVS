@@ -1,4 +1,20 @@
-local CurGamemode = GLMVS.ReturnCurGamemode()
+/* --------------------------------------------------------------------------
+    GLMVS - Globalized Map Voting System
+    Copyright (C) 2012  Robert Lind (ptown2)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-------------------------------------------------------------------------- */
 
 local function Initialize()
 	util.ValidFunction( CurGamemode, "OnInitialize" )
@@ -41,18 +57,15 @@ local function AddVote( pl, cmd, args )
 	util.ChattoPlayers( pl:Name().. " has voted " ..MapName.. " for " ..CurVotePower.. " votepoints." )
 end
 
-local function ClearVote()
+local function ClearVote( pl )
 	if pl.VotedAlready then
-		GLMVS.Maplist[ pl.VotedAlready ].Votes = GLMVS.Maplist[ pl.VotedAlready ].Votes - pl.VotePower
-
-		net.Start( "GLMVS_ReceiveVotes" )
-			net.WriteInt( pl.VotedAlready, 32 )
-			net.WriteInt( -pl.VotePower, 32 )
-		net.Broadcast()
+		GLMVS.AddVote( pl, pl.VotedAlready, -pl.VotePower )
 	end
 end
 
 local function StartVote()
+	local CurGamemode = GLMVS.ReturnCurGamemode()
+
 	if ( util.ValidFunction( CurGamemode, "ShouldRestartRound" ) || false ) then return end
 
 	timer.Simple( math.floor( ( ( util.ValidFunction( CurGamemode, "GetEndTime" ) || 0 ) * 0.15 ) ), function()
@@ -62,6 +75,8 @@ local function StartVote()
 end
 
 local function EndVote()
+	local CurGamemode = GLMVS.ReturnCurGamemode()
+
 	if !( util.ValidFunction( CurGamemode, "ShouldChangeMap" ) || true ) then return end
 
 	local winner, votes = GLMVS.GetNextMap()
@@ -79,12 +94,16 @@ local function EndVote()
 end
 
 -- Connect everything for GLMVS to handle.
-if ( #GLMVS.Maplist > 0 ) then
-	concommand.Add( "glmvs_vote", AddVote )
+hook.Add( "InitPostEntity", "AddGMHooks", function()
+	local CurGamemode = GLMVS.ReturnCurGamemode()
 
-	hook.Add( "Initialize", "GLMVSHookInit", Initialize )
-	hook.Add( "PlayerDisconnected", "GLMVSClearVote", ClearVote )
+	if ( #GLMVS.Maplist > 0 ) then
+		concommand.Add( "glmvs_vote", AddVote )
 
-	hook.Add( util.ValidVariable( CurGamemode, "HookEnd" ), "GLMVSHookStart", StartVote )
-	hook.Add( util.ValidVariable( CurGamemode, "HookMap" ), "GLMVSHookEnd", EndVote )
-end
+		hook.Add( "Initialize", "GLMVSHookInit", Initialize )
+		hook.Add( "PlayerDisconnected", "GLMVSClearVote", ClearVote )
+
+		hook.Add( util.ValidVariable( CurGamemode, "HookEnd" ), "GLMVSHookStart", StartVote )
+		hook.Add( util.ValidVariable( CurGamemode, "HookMap" ), "GLMVSHookEnd", EndVote )
+	end
+end )

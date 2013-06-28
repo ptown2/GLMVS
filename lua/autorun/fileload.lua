@@ -28,20 +28,21 @@ local function LoadFile( strDirectory, strFile )
 	local prefix = string.sub( strFile, 0, 3 )
 	local realFile = strDirectory.. "/" ..strFile
 
-	if ( prefix == "cl_" || strFile == "cl_init.lua" ) then
-		if SERVER then AddCSLuaFile( realFile ) else include( realFile ) end
-		return
-	elseif ( prefix == "sh_" || strFile == "shared.lua" ) then
+	if ( prefix == "sh_" || strFile == "shared.lua" ) then
+		MsgN( "SHARED Lua file: ", realFile, " loaded." )
 		if SERVER then AddCSLuaFile( realFile ) end
 		include( realFile )
-		return
+	elseif ( prefix == "cl_" || strFile == "cl_init.lua" ) then
+		MsgN( "CLIENT Lua file: ", realFile, " loaded." )
+		if SERVER then AddCSLuaFile( realFile ) else include( realFile ) end
 	elseif ( prefix == "sv_" || strFile == "init.lua" ) then
+		MsgN( "SERVER Lua file: ", realFile, " loaded." )
 		if SERVER then include( realFile ) end
-		return
+	elseif strDirectory == "gamemodes" then
+		MsgN( "GAMEMODE Lua file: ", realFile, " loaded." )
+		if SERVER then AddCSLuaFile( realFile ) end
+		include( realFile )
 	end
-
-	AddCSLuaFile( realFile )
-	include( realFile )
 end
 
 function RegisterLuaFolder( strDirectory )
@@ -67,14 +68,18 @@ function RegisterGamemodes( strDirectory )
 			LoadFile( strDirectory, filen )
 
 			if ( GAME.Name && GAME.ID ) then
-				GLMVS.Gamemodes[GAME.ID] = GAME
-				GLMVS.Gamemodes[GAME.Name] = GAME
+				GLMVS.Gamemodes[ GAME.ID ] = GAME
+				GLMVS.Gamemodes[ GAME.Name ] = GAME
 			end
-
 			included[filen] = GAME
 			GAME = nil
 		end
 	end
+end
+
+function RegisterGamemode( tblGame )
+	GLMVS.Gamemodes[ tblGame.ID ] = tblGame
+	GLMVS.Gamemodes[ tblGame.Name ] = tblGame
 end
 
 function RegisterLanguages( strDirectory )
