@@ -1,8 +1,7 @@
 -- This one will not work until the creator of this gamemode adds the line to call the hooks.
-MsgN( GAME )
 GAME.ID			= "stalker"
 GAME.Name		= "The Stalker"
-GAME.MapPrefix	= {"ts_"}
+GAME.MapPrefix	= {"ts"}
 GAME.MapFileDB	= "map_stalker"
 
 GAME.HookEnd	= "RoundEnd"

@@ -1,6 +1,6 @@
 GAME.ID			= "zombieescape"
 GAME.Name		= "Zombie Escape"
-GAME.MapPrefix	= {"ze_"}
+GAME.MapPrefix	= {"ze"}
 GAME.MapFileDB	= "map_zombieescape"
 
 GAME.HookEnd	= "OnTeamWin"

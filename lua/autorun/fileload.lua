@@ -5,7 +5,7 @@ module( "GLoader", package.seeall )
 local function GetFileList( strDirectory )
 	local files = {}
 
-	local realDirectory = strDirectory .. "/*"
+	local realDirectory = strDirectory.. "/*"
 	local findFiles, findFolders = file.Find( realDirectory, "lsv" )
 
 	for k, v in pairs( table.Add(findFiles, findFolders) ) do
@@ -26,7 +26,7 @@ end
 
 local function LoadFile( strDirectory, strFile )
 	local prefix = string.sub( strFile, 0, 3 )
-	local realFile = strDirectory .. "/" .. strFile
+	local realFile = strDirectory.. "/" ..strFile
 
 	if ( prefix == "cl_" || strFile == "cl_init.lua" ) then
 		if SERVER then AddCSLuaFile( realFile ) else include( realFile ) end
@@ -78,5 +78,6 @@ function RegisterGamemodes( strDirectory )
 end
 
 function RegisterLanguages( strDirectory )
-	local LANG = {}
+	local included = {}
+	--local langlist = GetFileList( strDirectory )
 end

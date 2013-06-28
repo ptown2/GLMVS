@@ -1,6 +1,6 @@
 GAME.ID			= "zombiesurvival"
 GAME.Name		= "Zombie Survival"
-GAME.MapPrefix	= {"zs_", "zm_", "zh_", "zps_", "zr_", "ze_"}
+GAME.MapPrefix	= {"zs", "zm", "zh", "zps", "zr", "ze"}
 GAME.MapFileDB	= "map_zombiesurvival"
 
 GAME.HookEnd	= "EndRound"

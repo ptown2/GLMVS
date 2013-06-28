@@ -25,7 +25,7 @@ hook.Add( "InitPostEntity", "LoadZSDermaSkin", function()
 
 	--SKIN.tooltip = Color(190, 190, 190, 230)
 
-	local color_frame_background = Color(0, 0, 0, 220)
+	local color_frame_background = Color(0, 0, 0, 250)
 	SKIN.color_frame_background = color_frame_background
 	SKIN.color_frame_border = Color(0, 80, 0, 255)
 

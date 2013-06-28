@@ -1,41 +1,13 @@
 local VoteFrame = nil
 
-local texCorner = surface.GetTextureID("zombiesurvival/circlegradient")
-local texUpEdge = surface.GetTextureID("gui/gradient_up")
-local texDownEdge = surface.GetTextureID("gui/gradient_down")
-local texRightEdge = surface.GetTextureID("gui/gradient")
-
-local function LowestSizeMult( factor, size )
-	return math.floor( ( factor / size ) - 1 )
-end
-
-local function Sizeto720p( size, src )
-	return math.floor( size * ( src / 720 ) )
-end
-
 local function CreateFonts()
-	surface.CreateFont( "VoteTitle" , { font = "Bebas Neue", size = Sizeto720p( 54, ScrH() ), weight = 1000 })
+	surface.CreateFont( "VoteTitle", { font = "Bebas Neue", size = util.Sizeto720p( 54, ScrH() ), weight = 500 })
+	surface.CreateFont( "VoteCaption", { font = "Bebas Neue", size = util.Sizeto720p( 28, ScrH() ), weight = 500 })
 end
 
-local function GenericImgButton( self )
-	local c, alpha = Color( 255, 255, 0, 255 ), 255
-
-	if ( self.Hovered ) then
-		alpha = 205
-
-		if ( self.Depressed ) then
-			c = Color( 255, 0, 0, 255 )
-		end
-
-		surface.SetDrawColor( Color( c.r, c.g, c.b, alpha ) )
-		surface.SetMaterial( Material( self.Image, "alphatest" ) )
-		surface.DrawTexturedRect( 0, 0, self:GetWide() - 0 , self:GetTall() - 0 )
-	end
-
-	local c = color_white
-	surface.SetDrawColor( Color( c.r, c.g, c.b, alpha ) )
-	surface.SetMaterial( Material( self.Image, "smooth mips" ) )
-	surface.DrawTexturedRect( 3, 3, self:GetWide() - 6 , self:GetTall() - 6 )
+-- Sort the map and keep the MapID for the server.
+for id, info in pairs( GLMVS.Maplist ) do
+	info.ID = id
 end
 
 function Derma_Votemap()
@@ -44,14 +16,13 @@ function Derma_Votemap()
 	CreateFonts()
 
 	local w, h = ScrW(), ScrH()
-	local imapsize, globalspacing = Sizeto720p( 150, h ), Sizeto720p( 8, h )
-	local numframesw, numframesh = LowestSizeMult( w, imapsize ), LowestSizeMult( h, imapsize )
+	local imapsize, globalspacing = util.Sizeto720p( 150, h ), util.Sizeto720p( 8, h )
+	local numframesw, numframesh = util.LowestSizeMult( w, imapsize ), util.LowestSizeMult( h, imapsize )
 
 	VoteFrame = vgui.Create("DFrame")
 	VoteFrame:SetTitle( " " )
 	VoteFrame:SetSize( ( numframesw * globalspacing ) + ( numframesw * imapsize ) + 35, ( numframesh * globalspacing ) + ( numframesh * imapsize ) + ( draw.GetFontHeight( "VoteTitle" ) ) + 20 )
 	VoteFrame:SetSkin( "zsvotemap" )
-	VoteFrame:SetPaintShadow( color_black )
 	VoteFrame:Center()
 
 	local TitleLabel = vgui.Create( "DLabel", VoteFrame )
@@ -72,13 +43,22 @@ function Derma_Votemap()
 	ListFrame:SetSpaceX( globalspacing )
 	ListFrame:SetSpaceY( globalspacing )
 
-	for _, info in pairs( GLMVS.Maplist ) do
+	table.sort( GLMVS.Maplist, GLMVS.SortMaps )
+
+	for id, info in pairs( GLMVS.Maplist ) do
 		local ListItem = ListFrame:Add( "DButton" )
 		ListItem:SetSize( imapsize, imapsize )
 		ListItem:SetText( " " )
-		ListItem.Image = "../maps/" .. info.Map .. ".png"
-		ListItem.Paint = GenericImgButton
+		ListItem:SetDisabled( tobool( info.Locked ) )
+		ListItem.MapName = info.Name || info.Map
+		ListItem.ID = id
+		ListItem.MapID = info.ID
+		ListItem.Image = util.IsValidImage( info.Map )
+		ListItem.Paint = GLMVS.GenericImgButton
+		ListItem.DoClick = GLMVS.Votemap
 	end
 
 	VoteFrame:MakePopup()
 end
+
+concommand.Add( "glmvs_openvote", Derma_Votemap )

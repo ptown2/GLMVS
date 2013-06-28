@@ -1,6 +1,6 @@
 GAME.ID			= "ttt"
 GAME.Name		= "Trouble in Terrorist Town"
-GAME.MapPrefix	= {"gm_", "ttt_"}
+GAME.MapPrefix	= {"gm", "ttt"}
 GAME.MapFileDB	= "map_ttt"
 
 GAME.HookEnd	= "TTTEndRound"
