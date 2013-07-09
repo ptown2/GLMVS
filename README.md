@@ -12,6 +12,7 @@ GLMVS stands for Globalized Map Voting System, a globalized map voting managemen
 #### UPCOMING GAMEMODE SUPPORTS: ####
 * Extreme Football Throwdown - (Maybe, if the fretta map voting doesn't come up for that gamemode.)
 * Ultimate Chimera Hunt - (Need to talk Schythed about it!)
+
 and many more soon! (Have one? REQUEST IT!)
 
 #### CONVARS: ####

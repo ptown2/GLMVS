@@ -2,5 +2,6 @@
 {
 	"name" "GLMVS"
 	"author_name" "ptown2"
-	"info" "A globalized vote map system add-on for every server owner to use."
+	"version" "1.0.1"
+	"info" "A globalized map voting system add-on that supports multiple gamemodes at once."
 }
