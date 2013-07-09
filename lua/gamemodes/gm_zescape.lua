@@ -3,7 +3,7 @@ local GAME = {}
 GAME.ID			= "zombieescape"
 GAME.Name		= "Zombie Escape"
 GAME.MapPrefix	= {"ze"}
-GAME.MapFileDB	= "map_zombieescape"
+GAME.MapFileDB	= "map_zombieescape.txt"
 
 GAME.HookEnd	= "OnTeamWin"
 GAME.HookMap	= "OnChangeRound"

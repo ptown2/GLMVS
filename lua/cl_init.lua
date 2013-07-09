@@ -19,8 +19,8 @@
 local VoteFrame = nil
 
 local function CreateFonts()
-	surface.CreateFont( "VoteTitle", { font = "Bebas Neue", size = util.Sizeto720p( 54, ScrH() ), weight = 500 })
-	surface.CreateFont( "VoteCaption", { font = "Bebas Neue", size = util.Sizeto720p( 28, ScrH() ), weight = 500 })
+	surface.CreateFont( "VoteTitle", { font = "Bebas Neue", size = util.SizeTo720p( 54, ScrH() ), weight = 500 })
+	surface.CreateFont( "VoteCaption", { font = "Bebas Neue", size = util.SizeTo720p( 26, ScrH() ), weight = 500 })
 end
 
 function Derma_Votemap()
@@ -29,12 +29,13 @@ function Derma_Votemap()
 	CreateFonts()
 
 	local w, h = ScrW(), ScrH()
-	local imapsize, globalspacing = util.Sizeto720p( 150, h ), util.Sizeto720p( 8, h )
+	local imapsize, globalspacing = util.SizeTo720p( 150, h ), util.SizeTo720p( 8, h )
 	local numframesw, numframesh = util.LowestSizeMult( w, imapsize ), util.LowestSizeMult( h, imapsize )
+	local fontheight = util.SizeTo720p( 54, ScrH() )
 
 	VoteFrame = vgui.Create("DFrame")
 	VoteFrame:SetTitle( " " )
-	VoteFrame:SetSize( ( numframesw * globalspacing ) + ( numframesw * imapsize ) + 35, ( numframesh * globalspacing ) + ( numframesh * imapsize ) + ( draw.GetFontHeight( "VoteTitle" ) ) + 20 )
+	VoteFrame:SetSize( ( numframesw * globalspacing ) + ( numframesw * imapsize ) + 35, ( numframesh * globalspacing ) + ( numframesh * imapsize ) + fontheight + 20 )
 	VoteFrame:SetSkin( "zsvotemap" )
 	VoteFrame:Center()
 
@@ -47,24 +48,30 @@ function Derma_Votemap()
 	TitleLabel:AlignTop( 10 )
 
 	local ScrlFrame = vgui.Create( "DScrollPanel", VoteFrame )
-	ScrlFrame:SetSize( ( numframesw * globalspacing ) + ( numframesw * imapsize ) - globalspacing, ( numframesh * globalspacing ) + ( numframesh * imapsize ) - 3 )
+	ScrlFrame:SetSize( ( numframesw * globalspacing ) + ( numframesw * imapsize ) + 12, ( numframesh * globalspacing ) + ( numframesh * imapsize ) - 3 )
 	ScrlFrame:CenterHorizontal()
-	ScrlFrame:AlignBottom( 10 )
+	ScrlFrame:AlignBottom( 8 )
 
 	local ListFrame = vgui.Create( "DIconLayout", ScrlFrame )
 	ListFrame:SetSize( ScrlFrame:GetWide(), ScrlFrame:GetTall() )
 	ListFrame:SetSpaceX( globalspacing )
 	ListFrame:SetSpaceY( globalspacing )
 
-	for id, info in pairs( GLMVS.Maplist ) do
+	for mapid, info in pairs( GLMVS.Maplist ) do
+		info.NextVote = info.TotalVotes
+		info.Votes = 0
+
 		local ListItem = ListFrame:Add( "DButton" )
 		ListItem:SetSize( imapsize, imapsize )
 		ListItem:SetText( " " )
+		ListItem:SetTooltip( info.Description )
 		ListItem:SetDisabled( tobool( info.Locked ) )
 		ListItem.MapName = info.Name || info.Map
-		--ListItem.ID = id
-		ListItem.MapID = id
+		ListItem.Author = info.Author
+		ListItem.MapID = info.ID
 		ListItem.Image = util.IsValidImage( info.Map )
+		ListItem.Ticker = draw.NewTicker( 4, 2 )
+		ListItem.Think = GLMVS.GenericThink
 		ListItem.Paint = GLMVS.GenericImgButton
 		ListItem.DoClick = GLMVS.Votemap
 	end

@@ -4,7 +4,7 @@ local GAME = {}
 GAME.ID			= "stalker"
 GAME.Name		= "The Stalker"
 GAME.MapPrefix	= {"ts"}
-GAME.MapFileDB	= "map_stalker"
+GAME.MapFileDB	= "map_stalker.txt"
 
 GAME.HookEnd	= "RoundEnd"
 

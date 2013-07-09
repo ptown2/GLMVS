@@ -1,6 +1,6 @@
 -- So apparently the skin was loaded earlier than the GWEN module. Had to do this in order to make it work...
 
-hook.Add( "InitPostEntity", "LoadZSDermaSkin", function()
+hook.Add( "Initialize", "GLMVS_LoadZSDermaSkin", function()
 	local SKIN = {}
 
 	SKIN.PrintName = "Zombie Survival Derma Skin"

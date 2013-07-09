@@ -3,7 +3,7 @@ local GAME = {}
 GAME.ID			= "ttt"
 GAME.Name		= "Trouble in Terrorist Town"
 GAME.MapPrefix	= {"gm", "ttt"}
-GAME.MapFileDB	= "map_ttt"
+GAME.MapFileDB	= "map_ttt.txt"
 
 GAME.HookEnd	= "TTTEndRound"
 

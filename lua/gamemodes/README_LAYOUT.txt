@@ -1,6 +1,6 @@
 --[[
 GLMVS uses this following gamemode map setting layout to make it work on the votemap system.
-Once the file is in place it will load the file automatically. You do not need to place any tables or functions on the start/end lines.
+Once the file is in place it will load the file automatically.
 Just make sure every info is CORRECT and that you do not place gramatical errors. Every entry is case-sensitive.
 Please make sure you know some of the LUA coding basics, it is a total requirement when dealing with this addon.
 
@@ -9,10 +9,12 @@ If you don't know how to edit this properly, contact ptown2 (Lead Developer) any
 CAREFUL WHEN ADDING SOMETING, DO SOMETHING WRONG AND IT MIGHT NOT LOAD!
 ]]--
 
+local GAME = {}
+
 GAME.ID = ""							-- Gamemode's Folder ID, edited gamemodes (like TTT, redonettt or ttt_modified) will use the GAMEMODE.Name instead.
 GAME.Name = ""							-- Gamemode's Name (You can get it from GM.Name or GAMEMODE.Name)
 GAME.MapPrefix = {""}					-- Map prefixes
-GAME.MapCycle = "mapcycle_*.txt"		-- Map cycle (Replace * with the gamemode's shorter name)
+GAME.MapFileDB = "mapcycle_*.txt"		-- Map cycle (Replace * with the gamemode's shorter name)
 
 
 -- Hooks
@@ -60,3 +62,6 @@ end
 function GAME:GetPlayerVote(pl)
 	-- Just make sure it returns the math. Returns 0 when the function is ignored.
 end
+
+-- Leave this line alone
+GLoader.RegisterGamemode( GAME )

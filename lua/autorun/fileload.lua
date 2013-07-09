@@ -1,5 +1,3 @@
-GAME, LANG = {}, {}
-
 module( "GLoader", package.seeall )
 
 local function GetFileList( strDirectory )
@@ -30,59 +28,38 @@ local function LoadFile( strDirectory, strFile )
 
 	if ( prefix == "sh_" || strFile == "shared.lua" ) then
 		MsgN( "SHARED Lua file: ", realFile, " loaded." )
-		if SERVER then AddCSLuaFile( realFile ) end
 		include( realFile )
 	elseif ( prefix == "cl_" || strFile == "cl_init.lua" ) then
 		MsgN( "CLIENT Lua file: ", realFile, " loaded." )
-		if SERVER then AddCSLuaFile( realFile ) else include( realFile ) end
+		if CLIENT then include( realFile ) end
 	elseif ( prefix == "sv_" || strFile == "init.lua" ) then
 		MsgN( "SERVER Lua file: ", realFile, " loaded." )
 		if SERVER then include( realFile ) end
 	elseif strDirectory == "gamemodes" then
 		MsgN( "GAMEMODE Lua file: ", realFile, " loaded." )
-		if SERVER then AddCSLuaFile( realFile ) end
 		include( realFile )
 	end
 end
 
-function RegisterLuaFolder( strDirectory )
-	local fileList = GetFileList( strDirectory )
+function RegisterCSFile( strDirectory )
+	local filelist = GetFileList( strDirectory )
 
-	for i, filen in pairs( fileList ) do
+	for i, filen in pairs( filelist ) do
+		local prefix = string.sub( filen, 0, 3 )
+
 		if ( IsLuaFile( filen ) ) then
-			LoadFile( strDirectory, filen )
-		end
-
-		if ( IsDirectory( filen ) ) then
-			RegisterLuaFolder( strDirectory.. "/" ..filen )
-		end
-	end
-end
-
-function RegisterGamemodes( strDirectory )
-	local included = {}
-	local gamemodelist = GetFileList( strDirectory )
-
-	for i, filen in pairs(gamemodelist) do
-		if IsLuaFile( filen ) then
-			LoadFile( strDirectory, filen )
-
-			if ( GAME.Name && GAME.ID ) then
-				GLMVS.Gamemodes[ GAME.ID ] = GAME
-				GLMVS.Gamemodes[ GAME.Name ] = GAME
+			if ( prefix == "cl_" || prefix == "sh_" || prefix == "gm_" ) || ( filen == "shared.lua" || filen == "cl_init.lua") then
+				AddCSLuaFile( strDirectory.. "/" ..filen )
 			end
-			included[filen] = GAME
-			GAME = nil
+		else
+			RegisterCSFile( strDirectory.. "/" ..filen )
 		end
 	end
 end
 
 function RegisterGamemode( tblGame )
-	GLMVS.Gamemodes[ tblGame.ID ] = tblGame
-	GLMVS.Gamemodes[ tblGame.Name ] = tblGame
-end
-
-function RegisterLanguages( strDirectory )
-	local included = {}
-	--local langlist = GetFileList( strDirectory )
+	if ( tblGame.ID && tblGame.Name ) then
+		GLMVS.Gamemodes[ tblGame.ID ] = tblGame
+		GLMVS.Gamemodes[ tblGame.Name ] = tblGame
+	end
 end

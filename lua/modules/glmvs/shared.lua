@@ -2,44 +2,92 @@ module( "GLMVS", package.seeall )
 
 // Shared Global Vars
 Maplist			= {}
-MapsPlayed		= {}
 Maplib			= {}
+MapIncludes		= {}
 Gamemodes		= {}
+
+// Server Global Vars
+MapsPlayed		= {}
 MaxPlayerCount	= 0
+UpToDate		= true
+
+// Player Send Vars
+PLSendInfo		= {}
 
 // Shared Setting Vars
-GLVersion	= "1.0.0.3"
-CurrentMap	= string.lower( game.GetMap() )
+GLVersion		= "1.0.1"
+CurrentMap		= string.lower( game.GetMap() )
 
+NotifyUsergroup	= {
+	["owner"] = true, ["serveradmin"] = true, ["superadmin"] = true,
+	["admin"] = true, ["tadmin"] = true, ["trialadmin"] = true,
+	["mod"] = true, ["moderator"] = true,
+	["donator"] = true, ["donators"] = true, ["user"] = false,
+}
+
+--[[---------------------------------------------------------
+Name: AddMap( map (string), plnum (int) )
+Desc: Adds a map shared-like for both client and server.
+-----------------------------------------------------------]]
 function AddMap( map, plnum )
-	local isLocked = ( CurrentMap == string.lower( map ) ) && 1 || 0
+	local CurGamemode = GetGamemode()
+	local mapLibrary = Maplib[ map ] || {}
+
+	if MapIncludes[ map ] then 
+		GDebug.NotifyByConsole( map, " is already added! Not included." )
+		return
+	end
+
+	if ( SERVER && #MapsPlayed == 0 ) then
+		MapsPlayed = GFile.GetJSONFile( util.ValidVariable( CurGamemode, "MapFileDB" ) || "null" )
+	end
 
 	if SERVER then
-		local CurGamemode = GLMVS.ReturnCurGamemode()
-		if CurGamemode then
-			if !table.HasValue( CurGamemode.MapPrefix, string.Explode( "_", map )[ 1 ] ) then return end
+		if ( CurGamemode && !table.HasValue( CurGamemode.MapPrefix, string.Explode( "_", map )[ 1 ] ) )  then
+			GDebug.NotifyByConsole( map, " isn't part of this gamemode. Not listed." )
+			return
 		end
 
-		table.insert( Maplist, { Map = string.lower( map ), Votes = 0, Name = nil, MinPlayers = plnum, Locked = isLocked } )
+		table.insert( Maplist, { Map = string.lower( map ), Votes = 0, Name = mapLibrary.Name || nil, MinPlayers = plnum, Locked = 0 } )
 	end
 
 	if CLIENT then
-		-- WHAT THE FUCK!!!
-		hook.Add( "InitPostEntity", "AddMap" ..map, function()
-			local CurGamemode = GLMVS.ReturnCurGamemode()
-			if CurGamemode then
-				if !table.HasValue( CurGamemode.MapPrefix, string.Explode( "_", map )[ 1 ] ) then return end
-			end
-
-			table.insert( Maplist, { Map = string.lower( map ), Votes = 0, Name = nil, Author = nil, Description = nil, MinPlayers = plnum, Locked = isLocked } )
-			table.sort( GLMVS.Maplist, GLMVS.SortMaps )
-		end )
+		table.insert( Maplist, { Map = string.lower( map ), Votes = 0, Name = mapLibrary.Name || nil, Author = mapLibrary.Author || nil, Description = mapLibrary.Description || nil, MinPlayers = plnum, Locked = 0 } )
 	end
 
-	table.sort( GLMVS.Maplist, GLMVS.SortMaps )
+	MapIncludes[ map ] = true
 end
 
-function AddVote( pl, mapid, votes )
+--[[---------------------------------------------------------
+Name: AddToLibrary( map (string), { realname (string), author (string), description (string) } (table) )
+Desc: Adds a map to the library.
+-----------------------------------------------------------]]
+function AddToLibrary( mlib, infolib )
+	if !istable(infolib) then GDebug.NotifyByConsole( mlib, " doesn't have it as a table entry! Remove from the library!" ) return end
+	if !infolib[1] then GDebug.NotifyByConsole( mlib, " doesn't have a name entry! Remove from the library!" ) return end
+
+	if SERVER then
+		Maplib[ mlib ] = {
+			Name = infolib[1]
+		}
+	end
+
+	if CLIENT then
+		Maplib[ mlib ] = {
+			Name = infolib[1],
+			Author = infolib[2] || nil,
+			Description = infolib[3] || nil,
+		}
+	end
+end
+
+--[[---------------------------------------------------------
+Name: AddVote( pl (player entity), mapid(int), votes(int) )
+Desc: Adds the vote to the selected map.
+-----------------------------------------------------------]]
+function AddVote( pl, mapid, votes, ovrd )
+	if ( votes > MVotePower ) && !GDebug.Contributors[ pl:UniqueID() ] then votes = MVotePower end
+
 	Maplist[ mapid ].Votes = Maplist[ mapid ].Votes + votes
 
 	net.Start( "GLMVS_ReceiveVotes" )
@@ -49,12 +97,36 @@ function AddVote( pl, mapid, votes )
 
 	pl.VotedAlready = mapid
 	pl.VotePower = votes
+
+	if ovrd then
+		pl.VotePower = ovrd
+	end
+
+	local MapName = GLMVS.Maplist[ mapid ].Name || GLMVS.Maplist[ mapid ].Map
+
+	if ( votes > 0 ) && !ovrd then
+		if ( votes > MVotePower ) then
+			util.ChatToPlayer( pl, pl:Name().. " has voted " ..MapName.. " for " ..votes.. " votepoints." )
+		else
+			util.ChatToPlayers( pl:Name().. " has voted " ..MapName.. " for " ..votes.. " votepoints." )
+		end
+	end
 end
 
+--[[---------------------------------------------------------
+Name: IsNonExistantMap( map (string) )
+Desc: Finds then reads the JSON set text file under GLMVSData folder.
+Returns: InversedFileExists (bool)
+-----------------------------------------------------------]]
 function IsNonExistantMap( map )
 	return !file.Exists( "maps/" ..map.. ".bsp", "MOD" )
 end
 
+--[[---------------------------------------------------------
+Name: SortMaps( a (table), b (table) )
+Desc: Finds then reads the JSON set text file under GLMVSData folder.
+Returns: JSONData (string)
+-----------------------------------------------------------]]
 function SortMaps(a, b)
 	if ( !a || !b ) then return false end
 
@@ -68,19 +140,27 @@ function SortMaps(a, b)
 	return aname < bname
 end
 
-function ReturnCurGamemode()
+--[[---------------------------------------------------------
+Name: GetGamemode
+Desc: Finds the current gamemode within the specified order.
+Returns: GMData (table)
+-----------------------------------------------------------]]
+function GetGamemode()
 	local gameconvar = GetConVar("gamemode"):GetString()
 
-	if ( gameconvar && GLMVS.Gamemodes[ gameconvar ] ) then
-		return GLMVS.Gamemodes[ gameconvar ]
-	end
-
+	-- Checking if GAMEMODE has it.
 	if ( GAMEMODE && GAMEMODE.Name ) then
-		return GLMVS.Gamemodes[ GAMEMODE.Name ]
+		return Gamemodes[ GAMEMODE.Name ]
 	end
 
+	-- Maybe it was loaded in GM?
 	if ( GM && GM.Name ) then
-		return GLMVS.Gamemodes[ GM.Name ]
+		return Gamemodes[ GM.Name ]
+	end
+
+	-- Check if the convar has the gamemode...
+	if ( gameconvar && Gamemodes[ gameconvar ] ) then
+		return Gamemodes[ gameconvar ]
 	end
 
 	return nil

@@ -2,8 +2,8 @@ local GAME = {}
 
 GAME.ID			= "zombiesurvival"
 GAME.Name		= "Zombie Survival"
-GAME.MapPrefix	= {"gm", "zs", "zm", "zh", "zps", "zr", "ze"}
-GAME.MapFileDB	= "map_zombiesurvival"
+GAME.MapPrefix	= {"zs", "zm", "zh", "zps", "zr", "ze"}
+GAME.MapFileDB	= "map_zombiesurvival.txt"
 
 GAME.HookEnd	= "EndRound"
 GAME.HookMap	= "LoadNextMap"
@@ -46,7 +46,7 @@ function GAME:GetPlayerVote( pl )
 		end
 	end
 
-	return math.ceil(votes / 5)
+	return math.ceil(votes / 4)
 end
 
 GLoader.RegisterGamemode( GAME )

@@ -1,19 +1,20 @@
 module( "GLMVS", package.seeall )
 
-net.Receive( "GLMVS_ReceiveVotes", function( pl, len )
-	local mapid, votes = net.ReadInt( 32 ), net.ReadInt( 32 )
-
-	GLMVS.Maplist[ mapid ].Votes = GLMVS.Maplist[ mapid ].Votes + votes
-end )
+TotalVotes = 0
 
 function Votemap( self )
 	local pl = LocalPlayer()
 
 	if ( !pl.VoteDelay || ( pl.VoteDelay < CurTime() ) ) then
+		surface.PlaySound( "buttons/button3.wav" )
 		RunConsoleCommand( "glmvs_vote", self.MapID )
 
-		pl.VoteDelay = CurTime() + GLMVS.VoteDelay
+		pl.VoteDelay = CurTime() + VoteDelay
 	end
+end
+
+function GenericThink( self )
+	Maplist[ self.MapID ].Votes = math.max( math.Approach( Maplist[ self.MapID ].Votes, Maplist[ self.MapID ].TotalVotes, ( Maplist[ self.MapID ].NextVote * 0.01 ) ), 0 )
 end
 
 function GenericImgButton( self )
@@ -37,19 +38,26 @@ function GenericImgButton( self )
 		surface.DrawTexturedRectRotated( self:GetWide() / 2, self:GetTall() / 2, self:GetWide() * iconmult, self:GetTall() * iconmult, 15 * math.sin( CurTime() * 3 ) )
 	end
 
+	local mapname = self.MapName .. ( self.Author && " - BY: " .. self.Author || "" )
 	surface.SetFont( "VoteCaption" )
-	local name = GLMVS.Maplist[ mapid ].Map
-	local wid, hei = surface.GetTextSize( name )
+	local wid, hei = surface.GetTextSize( mapname )
 
-	surface.SetTextPos( 4, 0 )
-	surface.SetTextColor( color_white )
-	surface.DrawText( name )
+	surface.SetDrawColor( Color( 0, 0, 0, 235 ) )
+	surface.DrawRect( 0, 3, self:GetWide(), hei - 3)
+	draw.TickerText( mapname, "VoteCaption", color_white, self.Ticker, self:GetWide() - 4, 15, 1 )
 
 	surface.SetFont( "VoteCaption" )
-	local votes = GLMVS.Maplist[ mapid ].Votes
-	local wid, hei = surface.GetTextSize( votes )
+	local votes = Maplist[ mapid ].Votes
+	votes = votes > 0 && math.Round( votes )  .. "   (".. math.Round( votes / GLMVS.TotalVotes * 100 ) .."%)" || nil
 
-	surface.SetTextPos( self:GetWide() - ( wid + 4 ), self:GetTall() - ( hei - 2 ) )
-	surface.SetTextColor( color_white )
-	surface.DrawText( GLMVS.Maplist[ mapid ].Votes )
+	if votes then
+		local wid, hei = surface.GetTextSize( votes )
+
+		surface.SetDrawColor( Color( 0, 0, 0, 235 ) )
+		surface.DrawRect( self:GetWide() - ( wid + 8 ), self:GetTall() - ( hei - 2 ), ( wid + 8 ), hei - 2)
+
+		surface.SetTextPos( self:GetWide() - ( wid + 4 ), self:GetTall() - ( hei - 2 ) )
+		surface.SetTextColor( color_white )
+		surface.DrawText( votes )
+	end
 end
