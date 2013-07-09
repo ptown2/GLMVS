@@ -11,10 +11,11 @@ CAREFUL WHEN ADDING SOMETING, DO SOMETHING WRONG AND IT MIGHT NOT LOAD!
 
 local GAME = {}
 
-GAME.ID = ""							-- Gamemode's Folder ID, edited gamemodes (like TTT, redonettt or ttt_modified) will use the GAMEMODE.Name instead.
-GAME.Name = ""							-- Gamemode's Name (You can get it from GM.Name or GAMEMODE.Name)
-GAME.MapPrefix = {""}					-- Map prefixes
-GAME.MapFileDB = "mapcycle_*.txt"		-- Map cycle (Replace * with the gamemode's shorter name)
+
+GAME.ID			= ""					-- Gamemode's Folder -Name- ID, edited gamemodes (like TTT, redonettt or ttt_modified) will use the GAMEMODE.Name instead.
+GAME.Name		= ""					-- Gamemode's Name (You can get it from GM.Name or GAMEMODE.Name)
+GAME.MapPrefix	= {""}					-- Map prefixes
+GAME.MapFileDB	= "mapcycle_*.txt"		-- Recent Maps Data (Replace * with the Gamemode's ID)
 
 
 -- Hooks
@@ -62,6 +63,7 @@ end
 function GAME:GetPlayerVote(pl)
 	-- Just make sure it returns the math. Returns 0 when the function is ignored.
 end
+
 
 -- Leave this line alone
 GLoader.RegisterGamemode( GAME )

@@ -1,7 +1,7 @@
 GLMVS
 =========
 
-GLMVS stands for Globalized Map Voting System, a globalized map voting management add-on to support multiple gamemodes at once. Modular coded to ensure easy modding and contributions for everyone.
+GLMVS stands for Globalized Map Voting System, a globalized map voting system add-on that supports multiple gamemodes at once. Modular coded to ensure easy modding and contributions for everyone.
 
 #### SUPPORTED GAMEMODES: ####
 * [Zombie Survival](http://facepunch.com/showthread.php?t=1160198) by [JetBoom](http://steamcommunity.com/profiles/76561197966880749) - (Tested and Fully Working)

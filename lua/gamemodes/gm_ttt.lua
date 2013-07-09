@@ -1,6 +1,6 @@
 local GAME = {}
 
-GAME.ID			= "ttt"
+GAME.ID			= "terrortown"
 GAME.Name		= "Trouble in Terrorist Town"
 GAME.MapPrefix	= {"gm", "ttt"}
 GAME.MapFileDB	= "map_ttt.txt"
