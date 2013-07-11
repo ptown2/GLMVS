@@ -35,7 +35,7 @@ hook.Add( "Initialize", "GLMVS_HandleTableMaps", function()
 			Maplist[ mapid ] = nil
 			MapsPlayed[ info.Map ] = nil 
 			MapIncludes[ info.Map ] = nil
-			NotifyByConsole( info.Map, " does not exist on the server. Client can't vote for this map." )
+			GDebug.NotifyByConsole( info.Map, " does not exist on the server. Client can't vote for this map." )
 		end
 
 		if MapsPlayed[ info.Map ] || ( info.Map == CurrentMap ) then
