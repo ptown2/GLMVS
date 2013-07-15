@@ -21,5 +21,5 @@
 
 -- Use this as example.
 GLMVS.AddToLibrary( "ze_minecraft_v1_1", { "ZE Minecraft" } )
-GLMVS.AddToLibrary( "zs_asylum_reborn_b2", { "Asylum Reborn" })
-GLMVS.AddToLibrary( "zs_canyon", { "Canyon" })
+GLMVS.AddToLibrary( "zs_asylum_reborn_b2", { "Asylum Reborn" } )
+GLMVS.AddToLibrary( "zs_canyon", { "Canyon" } )

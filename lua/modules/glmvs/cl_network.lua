@@ -29,24 +29,28 @@ net.Receive( "GLMVS_ReceiveMapInfo", function( pl, len )
 
 	table.sort( Maplist, SortMaps )
 
-	local mapinfo = net.ReadTable()
-	for mapid, info in pairs( mapinfo ) do
-		if info.Votes then
-			TotalVotes = TotalVotes + info.Votes
-			Maplist[ mapid ].TotalVotes = info.Votes
-		end
+	-- Set their corresponding map id or something
+	for mapid, info in pairs( Maplist ) do
+		info.TotalVotes = 0
+		info.NextVote = 0
+		info.ID = mapid
+	end
 
+	-- Organize votes and locked maps what not
+	local mapinfo = net.ReadTable()
+
+	for mapid, info in pairs( mapinfo ) do
 		if info.Locked then
 			Maplist[ mapid ].Locked = info.Locked
 		end
 	end
 
-	-- Should I make that locked maps are sent to bottom or not?
-	for mapid, info in pairs( Maplist ) do
-		info.TotalVotes = info.TotalVotes || 0
-		info.NextVote = 0
-		info.ID = mapid
-	end
-
 	table.sort( Maplist, SortMaps )
+
+	for mapid, info in pairs( mapinfo ) do
+		if info.Votes then
+			TotalVotes = TotalVotes + info.Votes
+			Maplist[ mapid ].TotalVotes = info.Votes
+		end
+	end
 end )

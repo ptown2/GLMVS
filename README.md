@@ -4,16 +4,22 @@ GLMVS
 GLMVS stands for Globalized Map Voting System, a globalized map voting system add-on that supports multiple gamemodes at once. Modular coded to ensure easy modding and contributions for everyone.
 
 #### SUPPORTED GAMEMODES: ####
-* [Zombie Survival](http://facepunch.com/showthread.php?t=1160198) by [JetBoom](http://steamcommunity.com/profiles/76561197966880749) - (Tested and Fully Working)
-* [Zombie Escape](http://facepunch.com/showthread.php?t=1187359) by [Samuel Maddock](http://steamcommunity.com/profiles/76561197991989781) - (Untested)
-* [The Stalker](http://www.facepunch.com/showthread.php?t=1218503) by [Twoski](http://steamcommunity.com/profiles/76561197994990341) - (Barely, requires a hook to work. Need to talk Twoski about it!)
-* [Trouble in Terrorist Town](http://ttt.badking.net/) by [BadKingUrgrain](http://steamcommunity.com/profiles/76561197964193008) - (Untested)
+* [Zombie Survival](http://facepunch.com/showthread.php?t=1160198) by [JetBoom](http://steamcommunity.com/profiles/76561197966880749)
+* [Zombie Escape](http://facepunch.com/showthread.php?t=1187359) by [Samuel Maddock](http://steamcommunity.com/profiles/76561197991989781)
+* [The Stalker](http://www.facepunch.com/showthread.php?t=1218503) by [Twoski](http://steamcommunity.com/profiles/76561197994990341) - (Untested but pretty sure it will work.)
+* [Trouble in Terrorist Town](http://ttt.badking.net/) by [BadKingUrgrain](http://steamcommunity.com/profiles/76561197964193008)
 
 #### UPCOMING GAMEMODE SUPPORTS: ####
+* Awesome-Strike: Source - (Maybe)
 * Extreme Football Throwdown - (Maybe, if the fretta map voting doesn't come up for that gamemode.)
 * Ultimate Chimera Hunt - (Need to talk Schythed about it!)
 
 and many more soon! (Have one? REQUEST IT!)
+
+
+#### INSTALLING THE ADDON: ####
+Simply place GLMVS in your root folder of `garrysmod/addons`. Make sure it's a dedicated server and not your listen/local one. Edit the following files mentioned in the Adding Maps and Adding to Library sections. Carefully read and check that your settings are correct, do not leave out a necessary comma out of the functions.
+
 
 #### CONVARS: ####
 * `glmvs_svotepower` `0 - INF (int)` The starting votepower for the players (Default is 2).
@@ -23,8 +29,37 @@ and many more soon! (Have one? REQUEST IT!)
 * `glmvs_notifyupdates` `0 - 1 (bool int)` Toggles the update notification (To players, doesn't disable for server console. Default is 1).
 * `glmvs_optoutlist` `0 - 1 (bool int)` Opt-outs the GLMVS Server Listing (Sends the server info to the list. Default is 0).
 
+
+#### ADDING MAPS: ####
+GLMVS will add maps via the `addmaps.lua` file using the `GLMVS.AddMap` function. This function requires two arguments Map Name (string) and Minimum Player Requirement (integer).
+
+Example:
+* `GLMVS.AddMap( "gm_construct" )` - This will add the map `GM_Construct` without minimum player requirement.
+* `GLMVS.AddMap( "gm_flatgrass", 2 )` - This will add the map `GM_Flatgrass` with a `2` minimum player requirement.
+
+Notes: GLMVS will only add gamemode based maps. There will be a convar which you can set it to ignore it.
+
+
+#### ADDING TO MAP LIBRARY: ####
+GLMVS has a library system to set maps with a custom name, their author and some small description for it. It will be added via the `maplibrary.lua` file using the `GLMVS.AddToLibrary`. This function requires two arguments Map Name (string) and Map Attributions (table). The Map Attributions must be a table within the following order `{ name for map, author, description }` all being strings. If you call this function, you must place the new name for the map or it wont work.
+
+Example:
+* `GLMVS.AddToLibrary( "gm_test", {"Test", "Whatever", "A map"} )` - This will set `GM_Test` name to Test with the author as `Whatever` with the description to `A map`.
+* `GLMVS.AddToLibrary( "gm_construct", {"Construct", "Facepunch"} )` - This will set `GM_Construct` name to `Construct` with the author as `Facepunch`.
+* `GLMVS.AddToLibrary( "gm_flatgrass", {"Flatgrass"} )` - This will set `GM_Flatgrass` name to `Flatgrass`.
+
+Notes: If you don't want to fill it then just set it to nil (without quotes). However a name MUST be placed.
+
+
+#### ADDING THE MAP IMAGES: ####
+GLMVS has an automatic system that it will grab every map image that is added within its maplist then force the client to download them. Simply place your images on the root folder of `garrysmod/maps`. Make sure the images are sized as 150x150, png format and have the same name as the map's name. `gm_flatgrass` would translate the map image to `gm_flatgrass.png`.
+
+Notes: GLMVS will ignore non-existent map images and will replace it with a missing map icon or simply a grey square.
+
+
 #### UPDATE NOTIFICATOR: ####
 GLMVS will notify the players about a new update in roll (anyone who's mentioned in the NotifyUsergroups) periodically. It captures the versioning within this github page and compares it with the one you've installed. It would be perfect not to modify the GLMVS module due to that reason. If the update notificator is too annoying, then you can disable the notification for players via the convar `glmvs_notifyupdate 0`. REMEMBER, it only disables the notification for the players, not for the server!
+
 
 #### SERVER LISTING: ####
 GLMVS will update/list your server upon every map change (soon to be daily or so). You can opt-out via the convar `glmvs_optoutlist 1`, but leaving it opt-in would help me keep stats/control of my addon. However, GLMVS will NOT SEND crucial server information. It will only send the following information:
@@ -37,8 +72,16 @@ GLMVS will update/list your server upon every map change (soon to be daily or so
 
 If it captures information beyond that point, please notify me (ptown2) so I can thoroughly investigate.
 
+
 #### CONTRIBUTIONS/DEVELOPMENT: ####
 A working dev branch will come out soon. Hold on until further updates. You can still contribute to the addon by helping on the github wiki for function documentation and such.
 
+
 #### NOTICES: ####
 This add-on is still in under-development, any changes are very crucial and demanding. Make sure to be updated at all costs!
+
+
+#### DONATIONS: ####
+Wish to give me some beer money? Then click the button below to do so!
+
+[![Donate some beer money!](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MQ495EBFXKD5Y&lc=US&item_name=GLMVS%20Donations&item_number=GLMVSDonation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)

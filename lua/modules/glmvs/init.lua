@@ -37,6 +37,15 @@ function PickUnlockedRandom()
 end
 
 --[[---------------------------------------------------------
+Name: IsNonExistentMap( map (string) )
+Desc: Finds if the map exists or not.
+Returns: inversedFileExists (bool)
+-----------------------------------------------------------]]
+function IsNonExistentMap( map )
+	return !file.Exists( "maps/" ..map.. ".bsp", "MOD" )
+end
+
+--[[---------------------------------------------------------
 Name: AddToRecentMaps( map (string) )
 Desc: Adds the map to the recently played maps data.
 -----------------------------------------------------------]]

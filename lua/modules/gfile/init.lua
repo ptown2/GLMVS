@@ -8,6 +8,8 @@ Name: SetJSONFile( filename (string), jtable (table) )
 Desc: Creates or overwrites a JSON set text file under GLMVSData folder.
 -----------------------------------------------------------]]
 function SetJSONFile( filename, jtable )
+	if !filename then return end
+
 	local jsonfile = file.Open( DirName.. "/" ..filename, "wb", "DATA" )
 
 	if jsonfile then
@@ -22,6 +24,8 @@ Desc: Finds then reads the JSON set text file under GLMVSData folder.
 Returns: JSONData (string)
 -----------------------------------------------------------]]
 function GetJSONFile( filename )
+	if !filename then return {} end
+
 	local jsonfile = file.Open( DirName.. "/" ..filename, "r", "DATA" )
 	local jsondata = "[]"
 

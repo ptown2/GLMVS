@@ -5,17 +5,10 @@ util.AddNetworkString( "GLMVS_ReceiveVotes" )
 util.AddNetworkString( "GLMVS_ReceiveMapInfo" )
 util.AddNetworkString( "GLMVS_UpdateVotes" )
 
--- Resource add those files.
-resource.AddFile( "resource/fonts/bebasneue.ttf" )
+-- Resource workshop the GLMVS Content
+resource.AddWorkshop( 160293553 )
 
-resource.AddFile( "materials/icon128/padlock.png" )
-
-resource.AddFile( "materials/gui/circlegradient.vmt" )
-resource.AddFile( "materials/gui/circlegradient.vtf" )
-
-resource.AddFile( "maps/noicon.png" )
-
--- Add the images to resource files
+-- Add the images to resource adding.
 hook.Add( "Initialize", "GLMVS_AddResourceMapIMG", function()
 	for _, info in pairs( Maplist ) do
 		if file.Exists( "maps/" ..info.Map.. ".png", "MOD" ) then
@@ -31,7 +24,7 @@ hook.Add( "Initialize", "GLMVS_HandleTableMaps", function()
 
 	-- Handle that shit!
 	for mapid, info in pairs( Maplist ) do
-		if IsNonExistantMap( info.Map ) then
+		if IsNonExistentMap( info.Map ) then
 			Maplist[ mapid ] = nil
 			MapsPlayed[ info.Map ] = nil 
 			MapIncludes[ info.Map ] = nil

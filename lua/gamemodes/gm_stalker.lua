@@ -1,33 +1,29 @@
 local GAME = {}
 
--- This one will not work until the creator of this gamemode adds the line to call the hooks.
 GAME.ID			= "stalker"
 GAME.Name		= "The Stalker"
 GAME.MapPrefix	= {"ts"}
 GAME.MapFileDB	= "map_stalker.txt"
 
-GAME.HookEnd	= "RoundEnd"
+GAME.HookEnd	= "LoadNextMap"
 
 function GAME:OnInitialize()
-	ROUNDSLEFT = GetConVar("sv_ts_num_rounds"):GetInt() or 0
-
-	-- This is to prevent the gamemode change the map via mapcycle.
-	function game.LoadNextMap() return false end
-	function game.GetMapNext() return "RANDOM" end
+	-- This is to prevent the gamemode change the map automatically.
+	function GAMEMODE:LoadNextMap() return end
 end
 
 function GAME:GetEndTime()
-	return 15
+	return 30
 end
 
-function GAME:ShouldRestartRound()
-	ROUNDSLEFT = math.max(0, (ROUNDSLEFT or 0) - 1)
+function GAME:OnStartVote()
+	timer.Simple( self:GetEndTime(), GLMVS_EndVote )
+end
 
-	if ROUNDSLEFT <= 0 then
-		timer.Simple(self:GetEndTime(), EndVote)
-		return false
-	end
-	return true
+function GAME:GetPlayerVote( pl )
+	local votes = 0
+
+	return votes
 end
 
 GLoader.RegisterGamemode( GAME )

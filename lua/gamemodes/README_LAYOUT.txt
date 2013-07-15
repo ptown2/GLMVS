@@ -31,7 +31,6 @@ end
 
 
 -- NOTE: Recommended only for TTT or to make the gamemode delay the round end time.
--- RETURN: Anything
 function GAME:OnStartVote()
 	-- What you should do when the votemap opens. Skips when the function is ignored.
 end
@@ -44,15 +43,9 @@ function GAME:GetEndTime()
 end
 
 
--- NOTE: Recommended only for TTT or for gamemodes who use game states (ex. wait, preparing, playing, end, etc.)
--- RETURN: Boolean
-function GAME:ShouldChangeMap()
-	-- Should the votemap instantly change map when it begins the next round? Skips when the function is ignored.
-end
-
-
 -- NOTE: Use this only when the gamemode supports overriding the mapcycle system and does everything above like the three functions.
--- RETURN: Boolean or Inversed ShouldChangeMap Boolean
+-- NOTE 2: Must be called within two hooks (THAT ARE BOTH CALLED WITHIN GAMEMODE STATES / WHATEVER), otherwise a function overriding in GAME:Initialize and a timer.Simple in this one must be made.
+-- RETURN: Boolean
 function GAME:ShouldRestartRound()
 	-- Should the votemap not open when the round is resetting? Skips when the function is ignored.
 end

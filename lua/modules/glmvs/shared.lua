@@ -15,7 +15,7 @@ UpToDate		= true
 PLSendInfo		= {}
 
 // Shared Setting Vars
-GLVersion		= "1.0.1"
+GLVersion		= "1.0.1.1"
 CurrentMap		= string.lower( game.GetMap() )
 
 NotifyUsergroup	= {
@@ -114,18 +114,9 @@ function AddVote( pl, mapid, votes, ovrd )
 end
 
 --[[---------------------------------------------------------
-Name: IsNonExistantMap( map (string) )
-Desc: Finds then reads the JSON set text file under GLMVSData folder.
-Returns: InversedFileExists (bool)
------------------------------------------------------------]]
-function IsNonExistantMap( map )
-	return !file.Exists( "maps/" ..map.. ".bsp", "MOD" )
-end
-
---[[---------------------------------------------------------
 Name: SortMaps( a (table), b (table) )
-Desc: Finds then reads the JSON set text file under GLMVSData folder.
-Returns: JSONData (string)
+Desc: Sorts the maps within a specified order.
+Returns: shouldSort (bool)
 -----------------------------------------------------------]]
 function SortMaps(a, b)
 	if ( !a || !b ) then return false end
@@ -146,15 +137,15 @@ Desc: Finds the current gamemode within the specified order.
 Returns: GMData (table)
 -----------------------------------------------------------]]
 function GetGamemode()
-	local gameconvar = GetConVar("gamemode"):GetString()
+	local gameconvar = string.lower( GetConVar("gamemode"):GetString() )
 
 	-- Checking if GAMEMODE has it.
-	if ( GAMEMODE && GAMEMODE.Name ) then
+	if ( GAMEMODE && GAMEMODE.Name && Gamemodes[ GAMEMODE.Name ] ) then
 		return Gamemodes[ GAMEMODE.Name ]
 	end
 
 	-- Maybe it was loaded in GM?
-	if ( GM && GM.Name ) then
+	if ( GM && GM.Name && Gamemodes[ GM.Name ] ) then
 		return Gamemodes[ GM.Name ]
 	end
 

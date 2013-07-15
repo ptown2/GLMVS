@@ -63,26 +63,23 @@ include( "gamemodes/gm_stalker.lua" )
 /* ----------------------------------------
 	Include Rest of the crap
 ---------------------------------------- */
-if SERVER then
-	include( "maplibrary.lua" )
-	include( "addmaps.lua" )
-	include( "init.lua" )
-end
-
-if CLIENT then
-	include( "maplibrary.lua" )
-	include( "addmaps.lua" )
-	include( "cl_init.lua" )
-end
-
-
-/* ----------------------------------------
-	GDebug functions to run
----------------------------------------- */
 hook.Add( "Initialize", "GLMVS_GDebugPrint", function()
 	if SERVER then
+		include( "maplibrary.lua" )
+		include( "addmaps.lua" )
+		include( "init.lua" )
+
+		/* ----------------------------------------
+			GDebug functions to run
+		---------------------------------------- */
 		GDebug.PrintResults()
 		GDebug.CheckForUpdates()
 		GDebug.OptToListing()
+	end
+
+	if CLIENT then
+		include( "maplibrary.lua" )
+		include( "addmaps.lua" )
+		include( "cl_init.lua" )
 	end
 end )
