@@ -12,15 +12,15 @@ CAREFUL WHEN ADDING SOMETING, DO SOMETHING WRONG AND IT MIGHT NOT LOAD!
 local GAME = {}
 
 
-GAME.ID			= ""					-- Gamemode's Folder -Name- ID, edited gamemodes (like TTT, redonettt or ttt_modified) will use the GAMEMODE.Name instead.
-GAME.Name		= ""					-- Gamemode's Name (You can get it from GM.Name or GAMEMODE.Name)
+GAME.ID		= ""					-- Gamemode's Folder -Name- ID, edited gamemodes (like TTT, redonettt or ttt_modified) will use the GAMEMODE.Name instead.
+GAME.Name	= ""					-- Gamemode's Name (You can get it from GM.Name or GAMEMODE.Name)
 GAME.MapPrefix	= {""}					-- Map prefixes
-GAME.MapFileDB	= "mapcycle_*.txt"		-- Recent Maps Data (Replace * with the Gamemode's ID)
+GAME.MapFileDB	= "map_*.txt"				-- Recent Maps Data (Replace * with the Gamemode's ID)
 
 
 -- Hooks
-GAME.HookEnd = ""						-- Round End hook
-GAME.HookMap = ""						-- Round Start or Map Load hook ( not game.LoadNextMap() )
+GAME.HookEnd = ""					-- Round End hook
+GAME.HookMap = ""					-- Round Start or Map Load hook ( not game.LoadNextMap() )
 
 
 -- NOTE: Useful for getting convars
