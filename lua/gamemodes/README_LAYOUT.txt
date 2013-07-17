@@ -19,8 +19,8 @@ GAME.MapFileDB	= "map_*.txt"				-- Recent Maps Data (Replace * with the Gamemode
 
 
 -- Hooks
-GAME.HookEnd = ""					-- Round End hook
-GAME.HookMap = ""					-- Round Start or Map Load hook ( not game.LoadNextMap() )
+GAME.HookEnd = ""					-- Round End hook / Load Next Map hook*
+GAME.HookMap = ""					-- Load Next Map hook
 
 
 -- NOTE: Useful for getting convars
@@ -30,24 +30,26 @@ function GAME:OnInitialize()
 end
 
 
--- NOTE: Recommended only for TTT or to make the gamemode delay the round end time.
-function GAME:OnStartVote()
-	-- What you should do when the votemap opens. Skips when the function is ignored.
-end
-
-
--- NOTE: Use this to get the time left for the next round or next map.
+-- NOTE: Use this to get the time left for the next round or next map or w/e.
 -- RETURN: Integer
 function GAME:GetEndTime()
 	-- How long is the wait? Returns 0 when the function is ignored
 end
 
 
--- NOTE: Use this only when the gamemode supports overriding the mapcycle system and does everything above like the three functions.
--- NOTE 2: Must be called within two hooks (THAT ARE BOTH CALLED WITHIN GAMEMODE STATES / WHATEVER), otherwise a function overriding in GAME:Initialize and a timer.Simple in this one must be made.
+-- NOTE: This is called upon the HookEnd variable you've placed.
+-- NOTE 2: Use this only when the gamemode has roundmax and currentround values.
+-- NOTE 3: Don't use this if the hook you're using is called to DIRECTLY change the map. Use the HookMap for that hook in specific.
 -- RETURN: Boolean
 function GAME:ShouldRestartRound()
 	-- Should the votemap not open when the round is resetting? Skips when the function is ignored.
+end
+
+
+-- NOTE: Recommended only to use a timer.Simple in order to call GLMVS_EndVote.
+-- NOTE 2: Don't use this if the gamemode handles another hook to call when it is time to change map. (Look gm_zs.lua)
+function GAME:OnStartVote()
+	-- What you should do when the votemap opens. Skips when the function is ignored.
 end
 
 
@@ -60,3 +62,9 @@ end
 
 -- Leave this line alone
 GLoader.RegisterGamemode( GAME )
+
+/*
+	OTHER NOTES:
+	* - Only if the gamemode doesn't have RoundEnd hook BUT has a hook to load the next map.
+	Requires to modify the setting deeper.
+*/
