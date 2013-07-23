@@ -11,7 +11,6 @@ function GAME:OnInitialize()
 	self.ROUNDSLEFT = GetConVar("ttt_round_limit"):GetInt() || 0
 	self.TIMELEFT = ( GetConVar("ttt_time_limit_minutes"):GetInt() * 60 ) || 0
 
-	-- This is to prevent the gamemode change the map via mapcycle.
 	function game.LoadNextMap() return false end
 	function game.GetMapNext() return "RANDOM" end
 end

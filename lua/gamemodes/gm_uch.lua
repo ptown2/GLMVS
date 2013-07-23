@@ -1,18 +1,22 @@
 local GAME = {}
 
-GAME.ID			= "stalker"
-GAME.Name		= "The Stalker"
-GAME.MapPrefix	= {"ts"}
-GAME.MapFileDB	= "map_stalker.txt"
+GAME.ID			= "ultimatechimerahunt"
+GAME.Name		= "Ultimate Chimera Hunt"
+GAME.MapPrefix	= {"uch"}
+GAME.MapFileDB	= "map_uch.txt"
 
-GAME.HookEnd	= "LoadNextMap"
+GAME.HookEnd	= "RoundEnd"
 
 function GAME:OnInitialize()
-	function GAMEMODE:LoadNextMap() return end
+	-- Do something else
 end
 
 function GAME:GetEndTime()
 	return 30
+end
+
+function GAME:ShouldRestartRound()
+	return true
 end
 
 function GAME:OnStartVote()

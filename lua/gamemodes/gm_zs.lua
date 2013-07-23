@@ -8,6 +8,10 @@ GAME.MapFileDB	= "map_zombiesurvival.txt"
 GAME.HookEnd	= "EndRound"
 GAME.HookMap	= "LoadNextMap"
 
+function GAME:OnInitialize()
+	function GAMEMODE:LoadNextMap() return end
+end
+
 function GAME:GetEndTime()
 	return GAMEMODE.EndGameTime
 end

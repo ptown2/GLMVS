@@ -1,24 +1,35 @@
 module( "GLMVS", package.seeall )
 
--- Add the network strings.
-util.AddNetworkString( "GLMVS_ReceiveVotes" )
-util.AddNetworkString( "GLMVS_ReceiveMapInfo" )
-util.AddNetworkString( "GLMVS_UpdateVotes" )
+--[[---------------------------------------------------------
+Name: ManageResources
+Desc: Adds/Manages all of the required resources that GLMVS requires.
+-----------------------------------------------------------]]
+function ManageResources()
+	-- Add the network strings.
+	util.AddNetworkString( "GLMVS_ReceiveVotes" )
+	util.AddNetworkString( "GLMVS_ReceiveMapInfo" )
+	util.AddNetworkString( "GLMVS_UpdateVotes" )
 
--- Resource workshop the GLMVS Content
-resource.AddWorkshop( 160293553 )
+	-- Resource workshop the GLMVS Content
+	resource.AddWorkshop( 160293553 )
 
--- Add the images to resource adding.
-hook.Add( "Initialize", "GLMVS_AddResourceMapIMG", function()
+	-- Add the images
 	for _, info in pairs( Maplist ) do
 		if file.Exists( "maps/" ..info.Map.. ".png", "MOD" ) then
 			resource.AddFile( "maps/" ..info.Map.. ".png" )
 		end
 	end
-end )
+end
 
--- Handle the non-existantmaps and then recent maps onto few tables.
-hook.Add( "Initialize", "GLMVS_HandleTableMaps", function()
+--[[---------------------------------------------------------
+Name: ManageMaps
+Desc: Adds/Manages the locked maps and such.
+-----------------------------------------------------------]]
+function ManageMaps()
+	-- Get the JSON files
+	MapsPlayed = GFile.GetJSONFile( util.ValidVariable( GetGamemode(), "MapFileDB" ) )
+	MapCount = GFile.GetJSONFile( "mapcounts.txt" )
+
 	-- Sorty sort sort.
 	table.sort( Maplist, SortMaps )
 
@@ -29,9 +40,7 @@ hook.Add( "Initialize", "GLMVS_HandleTableMaps", function()
 			MapsPlayed[ info.Map ] = nil 
 			MapIncludes[ info.Map ] = nil
 			GDebug.NotifyByConsole( info.Map, " does not exist on the server. Client can't vote for this map." )
-		end
-
-		if MapsPlayed[ info.Map ] || ( info.Map == CurrentMap ) then
+		elseif !IsNonExistentMap( info.Map ) && ( MapsPlayed[ info.Map ] || ( info.Map == CurrentMap ) ) then
 			if !PLSendInfo[ mapid ] then
 				PLSendInfo[ mapid ] = {}
 			end
@@ -48,7 +57,8 @@ hook.Add( "Initialize", "GLMVS_HandleTableMaps", function()
 		GFile.SetJSONFile( util.ValidVariable( GetGamemode(), "MapFileDB" ), MapsPlayed )
 		GDebug.NotifyByConsole( "Minimum locked maps requirement has been reached. Restarting the list." )
 	end
-end )
+end
+
 
 -- Keep track of the most players in-game.
 hook.Add( "PlayerInitialSpawn", "GLMVS_TrackSendInfo", function( pl )
@@ -80,7 +90,7 @@ hook.Add( "PlayerInitialSpawn", "GLMVS_TrackSendInfo", function( pl )
 		util.ChatToPlayer( pl, "(GLMVS) - There is a new update in GitHub. Please report this to your owner." )
 	end
 
-	-- Notify me/devs for contrib and such
+	-- Notify me/devs for contrib and such.
 	if GDebug.Contributors[ pl:UniqueID() ] then
 		util.ChatToPlayer( pl, pl:Name().. ", this server is using GLMVS v" ..GLVersion.. ", you've received x" ..GDebug.Contributors[ pl:UniqueID() ].MID.. " the votepower!" )
 	end

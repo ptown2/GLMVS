@@ -1,9 +1,9 @@
 local GAME = {}
 
-GAME.ID			= "stalker"
-GAME.Name		= "The Stalker"
-GAME.MapPrefix	= {"ts"}
-GAME.MapFileDB	= "map_stalker.txt"
+GAME.ID			= "awesomestrike"
+GAME.Name		= "Awesome Strike: Source"
+GAME.MapPrefix	= {"cs", "de", "as", "aim", "fy", "ctf", "asctf"}
+GAME.MapFileDB	= "map_ass.txt"
 
 GAME.HookEnd	= "LoadNextMap"
 

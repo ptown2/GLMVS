@@ -1,28 +1,20 @@
 module( "GLMVS", package.seeall )
 
-// Shared Global Vars
+-- Shared Global Vars
 Maplist			= {}
 Maplib			= {}
 MapIncludes		= {}
 Gamemodes		= {}
 
-// Server Global Vars
-MapsPlayed		= {}
-MaxPlayerCount	= 0
-UpToDate		= true
-
-// Player Send Vars
-PLSendInfo		= {}
-
-// Shared Setting Vars
-GLVersion		= "1.0.1.1"
+-- Shared Setting Vars
+GLVersion		= "1.0.2"
 CurrentMap		= string.lower( game.GetMap() )
 
 NotifyUsergroup	= {
-	["owner"] = true, ["serveradmin"] = true, ["superadmin"] = true,
-	["admin"] = true, ["tadmin"] = true, ["trialadmin"] = true,
-	["mod"] = true, ["moderator"] = true,
-	["donator"] = true, ["donators"] = true, ["user"] = false,
+	["serverowner"] = true, ["owner"] = true, ["serveradmin"] = true, ["superadmin"] = true,
+	["admin"] = true, ["tadmin"] = true, ["trialadmin"] = true, ["manager"] = true,
+	["mod"] = true, ["moderator"] = true, ["trialmod"] = true, ["tmod"] = true,
+	["donator"] = true, ["donators"] = true, ["respected"] = true, ["user"] = false,
 }
 
 --[[---------------------------------------------------------
@@ -33,26 +25,26 @@ function AddMap( map, plnum )
 	local CurGamemode = GetGamemode()
 	local mapLibrary = Maplib[ map ] || {}
 
-	if MapIncludes[ map ] then 
+	-- Do some checks and shit.
+	if MapIncludes[ map ] then
 		GDebug.NotifyByConsole( map, " is already added! Not included." )
+		return
+	elseif CurGamemode && !AllowNonGMRelatedMaps && !table.HasValue( CurGamemode.MapPrefix, string.Explode( "_", map )[1] ) then
+		GDebug.NotifyByConsole( map, " isn't part of this gamemode. Not listed." )
 		return
 	end
 
-	if ( SERVER && #MapsPlayed == 0 ) then
-		MapsPlayed = GFile.GetJSONFile( util.ValidVariable( CurGamemode, "MapFileDB" ) || "null" )
-	end
-
+	-- Now add the map SHARED-ey
 	if SERVER then
-		if ( CurGamemode && !table.HasValue( CurGamemode.MapPrefix, string.Explode( "_", map )[ 1 ] ) )  then
-			GDebug.NotifyByConsole( map, " isn't part of this gamemode. Not listed." )
-			return
-		end
-
-		table.insert( Maplist, { Map = string.lower( map ), Votes = 0, Name = mapLibrary.Name || nil, MinPlayers = plnum, Locked = 0 } )
+		table.insert( Maplist, {
+			Map = string.lower( map ), Votes = 0, Name = mapLibrary.Name || nil, MinPlayers = plnum, Locked = 0
+		} )
 	end
 
 	if CLIENT then
-		table.insert( Maplist, { Map = string.lower( map ), Votes = 0, Name = mapLibrary.Name || nil, Author = mapLibrary.Author || nil, Description = mapLibrary.Description || nil, MinPlayers = plnum, Locked = 0 } )
+		table.insert( Maplist, {
+			Map = string.lower( map ), Votes = 0, Name = mapLibrary.Name || nil, Author = mapLibrary.Author || nil, Description = mapLibrary.Description || nil, MinPlayers = plnum, Locked = 0
+		} )
 	end
 
 	MapIncludes[ map ] = true
@@ -64,7 +56,7 @@ Desc: Adds a map to the library.
 -----------------------------------------------------------]]
 function AddToLibrary( mlib, infolib )
 	if !istable(infolib) then GDebug.NotifyByConsole( mlib, " doesn't have it as a table entry! Remove from the library!" ) return end
-	if !infolib[1] then GDebug.NotifyByConsole( mlib, " doesn't have a name entry! Remove from the library!" ) return end
+	if !infolib[1] then GDebug.NotifyByConsole( mlib, " doesn't have a name entry in the table! Remove from the library!" ) return end
 
 	if SERVER then
 		Maplib[ mlib ] = {
@@ -78,38 +70,6 @@ function AddToLibrary( mlib, infolib )
 			Author = infolib[2] || nil,
 			Description = infolib[3] || nil,
 		}
-	end
-end
-
---[[---------------------------------------------------------
-Name: AddVote( pl (player entity), mapid(int), votes(int) )
-Desc: Adds the vote to the selected map.
------------------------------------------------------------]]
-function AddVote( pl, mapid, votes, ovrd )
-	if ( votes > MVotePower ) && !GDebug.Contributors[ pl:UniqueID() ] then votes = MVotePower end
-
-	Maplist[ mapid ].Votes = Maplist[ mapid ].Votes + votes
-
-	net.Start( "GLMVS_ReceiveVotes" )
-		net.WriteInt( mapid, 32 )
-		net.WriteInt( votes, 32 )
-	net.Broadcast()
-
-	pl.VotedAlready = mapid
-	pl.VotePower = votes
-
-	if ovrd then
-		pl.VotePower = ovrd
-	end
-
-	local MapName = GLMVS.Maplist[ mapid ].Name || GLMVS.Maplist[ mapid ].Map
-
-	if ( votes > 0 ) && !ovrd then
-		if ( votes > MVotePower ) then
-			util.ChatToPlayer( pl, pl:Name().. " has voted " ..MapName.. " for " ..votes.. " votepoints." )
-		else
-			util.ChatToPlayers( pl:Name().. " has voted " ..MapName.. " for " ..votes.. " votepoints." )
-		end
 	end
 end
 

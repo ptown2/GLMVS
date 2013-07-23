@@ -22,12 +22,16 @@ Desc: Checks if the image is valid.
 Returns: imgDirectory (string)
 -----------------------------------------------------------]]
 function util.IsValidImage( mapname )
+	if file.Exists( "download/maps/" ..mapname.. ".png", "MOD" ) then
+		return "../download/maps/" ..mapname.. ".png"
+	end
+
 	if file.Exists( "maps/" ..mapname.. ".png", "MOD" ) then
 		return "../maps/" ..mapname.. ".png"
 	end
 
-	if file.Exists( "download/maps/" ..mapname.. ".png", "MOD" ) then
-		return "../download/maps/" ..mapname.. ".png"
+	if file.Exists( "materials/noicon.png", "MOD" ) then
+		return "materials/noicon.png"
 	end
 
 	if file.Exists( "maps/noicon.png", "MOD" ) then

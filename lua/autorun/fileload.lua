@@ -4,9 +4,9 @@ local function GetFileList( strDirectory )
 	local files = {}
 
 	local realDirectory = strDirectory.. "/*"
-	local findFiles, findFolders = file.Find( realDirectory, "lsv" )
+	local findFiles, findFolders = file.Find( realDirectory, "LUA" )
 
-	for k, v in pairs( table.Add(findFiles, findFolders) ) do
+	for k, v in ipairs( table.Add( findFiles, findFolders ) ) do
 		if ( v == "." || v == ".." || v == ".svn" ) then continue end
 		table.insert( files, v )
 	end
@@ -14,8 +14,12 @@ local function GetFileList( strDirectory )
 	return files
 end
 
+local function GetFileType( strFile )
+	return string.sub( strFile, -4 )
+end
+
 local function IsLuaFile( strFile )
-	return ( string.sub( strFile, -4 ) == ".lua" )
+	return ( GetFileType( strFile ) == ".lua" )
 end
 
 local function IsDirectory( strDir )
@@ -27,39 +31,61 @@ local function LoadFile( strDirectory, strFile )
 	local realFile = strDirectory.. "/" ..strFile
 
 	if ( prefix == "sh_" || strFile == "shared.lua" ) then
-		MsgN( "SHARED Lua file: ", realFile, " loaded." )
 		include( realFile )
 	elseif ( prefix == "cl_" || strFile == "cl_init.lua" ) then
-		MsgN( "CLIENT Lua file: ", realFile, " loaded." )
 		if CLIENT then include( realFile ) end
 	elseif ( prefix == "sv_" || strFile == "init.lua" ) then
-		MsgN( "SERVER Lua file: ", realFile, " loaded." )
 		if SERVER then include( realFile ) end
 	elseif strDirectory == "gamemodes" then
-		MsgN( "GAMEMODE Lua file: ", realFile, " loaded." )
 		include( realFile )
 	end
 end
 
-function RegisterCSFile( strDirectory )
+function RegisterCSFiles( strDirectory )
 	local filelist = GetFileList( strDirectory )
 
 	for i, filen in pairs( filelist ) do
 		local prefix = string.sub( filen, 0, 3 )
 
 		if ( IsLuaFile( filen ) ) then
-			if ( prefix == "cl_" || prefix == "sh_" || prefix == "gm_" ) || ( filen == "shared.lua" || filen == "cl_init.lua") then
+			if ( prefix == "cl_" || prefix == "sh_" || prefix == "gm_" ) || ( filen == "shared.lua" || filen == "cl_init.lua" ) then
 				AddCSLuaFile( strDirectory.. "/" ..filen )
 			end
 		else
-			RegisterCSFile( strDirectory.. "/" ..filen )
+			RegisterCSFiles( strDirectory.. "/" ..filen )
+		end
+	end
+end
+
+function RegisterLuaFiles( strDirectory )
+	local filelist = GetFileList( strDirectory )
+
+	for i, filen in ipairs( filelist ) do
+		local prefix = string.sub( filen, 0, 3 )
+
+		if ( IsLuaFile( filen ) ) then
+			LoadFile( strDirectory, filen )
+		else
+			if !( GetFileType( filen ) == ".txt" ) then
+				RegisterLuaFiles( strDirectory.. "/" ..filen )
+				MsgN( "(GLMVS) - ", "MODULE folder ", filen, " loaded." )
+			end
 		end
 	end
 end
 
 function RegisterGamemode( tblGame )
 	if ( tblGame.ID && tblGame.Name ) then
-		GLMVS.Gamemodes[ tblGame.ID ] = tblGame
-		GLMVS.Gamemodes[ tblGame.Name ] = tblGame
+		if SERVER then
+			GLMVS.Gamemodes[ tblGame.ID ] = tblGame
+			GLMVS.Gamemodes[ tblGame.Name ] = tblGame
+		end
+		
+		if CLIENT then
+			GLMVS.Gamemodes[ tblGame.ID ] = { ID = tblGame.ID, Name = tblGame.Name, MapPrefix = tblGame.MapPrefix }
+			GLMVS.Gamemodes[ tblGame.Name ] = { ID = tblGame.ID, Name = tblGame.Name, MapPrefix = tblGame.MapPrefix }
+		end
+
+		MsgN( "(GLMVS) - ", "GAMEMODE SETTING ", tblGame.Name, " loaded." )
 	end
 end

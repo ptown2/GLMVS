@@ -8,7 +8,6 @@ GAME.MapFileDB	= "map_zombieescape.txt"
 GAME.HookEnd	= "ChangeMap"
 
 function GAME:OnInitialize()
-	-- This is to prevent the gamemode change the map automatically.
 	function GAMEMODE:ChangeMap() return end
 end
 

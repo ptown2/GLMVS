@@ -4,14 +4,12 @@ GLMVS
 GLMVS stands for Globalized Map Voting System, a globalized map voting system add-on that supports multiple gamemodes at once. Modular coded to ensure easy modding and contributions for everyone.
 
 #### SUPPORTED GAMEMODES: ####
-* [Zombie Survival](http://facepunch.com/showthread.php?t=1160198) by [JetBoom](http://steamcommunity.com/profiles/76561197966880749)
+* [Zombie Survival](http://facepunch.com/showthread.php?t=1160198) and [Awesome Strike: Source](http://www.facepunch.com/showthread.php?t=1127734) by [JetBoom](http://steamcommunity.com/profiles/76561197966880749)
 * [Zombie Escape](http://facepunch.com/showthread.php?t=1187359) by [Samuel Maddock](http://steamcommunity.com/profiles/76561197991989781)
-* [The Stalker](http://www.facepunch.com/showthread.php?t=1218503) by [Twoski](http://steamcommunity.com/profiles/76561197994990341) - (Untested but pretty sure it will work.)
+* [The Stalker](http://www.facepunch.com/showthread.php?t=1218503) by [Twoski](http://steamcommunity.com/profiles/76561197994990341)
 * [Trouble in Terrorist Town](http://ttt.badking.net/) by [BadKingUrgrain](http://steamcommunity.com/profiles/76561197964193008)
 
 #### UPCOMING GAMEMODE SUPPORTS: ####
-* Awesome-Strike: Source - (Maybe)
-* Extreme Football Throwdown - (Maybe, if the fretta map voting doesn't come up for that gamemode.)
 * Ultimate Chimera Hunt - (Need to talk Schythed about it!)
 
 and many more soon! (Have one? REQUEST IT!)
@@ -23,11 +21,16 @@ Simply place GLMVS in your root folder of `garrysmod/addons`. Make sure it's a d
 
 #### CONVARS: ####
 * `glmvs_svotepower` `0 - INF (int)` The starting votepower for the players (Default is 2).
-* `glmvs_mvotepower` `more than glmvs_svotepower - INF (int)` The maximum votepower for the players, prevents taking complete control of the votemap. This convar is supposed to be higher than the starting votepower. (Default is 100).
+* `glmvs_mvotepower` `more than glmvs_svotepower - INF (int)` The maximum votepower for the players, prevents taking complete control of the votemap. This convar is supposed to be higher than the starting votepower. Place 0 or -1 to disable (Default is 100).
 * `glmvs_maplockthreshold` `0 - 1 (float)` The percentage of maps required to be locked (Default is 0.7).
-* `glmvs_votedelay` `0 - INF (int/float)` The wait-time in seconds for the next vote to be produced. Place 0 or -1 to disable (Default is 2).
+* `glmvs_rtvthreshold` `0 - 1 (float)` The percentage of players required for RTV to take control (Default is 0.75).
+* `glmvs_rtvtimelimit` `0 - INF (int)` Sets the cooldown timelimit before starting a RTV in minutes (Default is 15) .
+* `glmvs_votedelay` `0 - INF (int)` The wait-time in seconds for the next vote to be produced. Place 0 or -1 to disable (Default is 2).
 * `glmvs_notifyupdates` `0 - 1 (bool int)` Toggles the update notification (To players, doesn't disable for server console. Default is 1).
-* `glmvs_optoutlist` `0 - 1 (bool int)` Opt-outs the GLMVS Server Listing (Sends the server info to the list. Default is 0).
+* `glmvs_optoutlist` `0 - 1 (bool int)` Opt-outs the GLMVS Server Listing (Sends the server info to the list (Default is 0).
+* `glmvs_allowallmaps` `0 - 1 (bool int)` Enables GLMVS to allow to add any non-gamemode related maps (Default is 0).
+* `glmvs_enablertv` `0 - 1 (bool int)` Enables the RTV Mode on GLMVS (Default is 0).
+* `glmvs_frettamode` `0 - 1 (bool int)` Enables the Fretta Mode on GLMVS (Default is 0, NOT DONE YET!).
 
 
 #### ADDING MAPS: ####
@@ -37,7 +40,7 @@ Example:
 * `GLMVS.AddMap( "gm_construct" )` - This will add the map `GM_Construct` without minimum player requirement.
 * `GLMVS.AddMap( "gm_flatgrass", 2 )` - This will add the map `GM_Flatgrass` with a `2` minimum player requirement.
 
-Notes: GLMVS will only add gamemode based maps. There will be a convar which you can set it to ignore it.
+Notes: GLMVS will only add gamemode based maps. Unless you set the convar to allow any maps to one. (See CONVARS)
 
 
 #### ADDING TO MAP LIBRARY: ####
@@ -48,13 +51,15 @@ Example:
 * `GLMVS.AddToLibrary( "gm_construct", {"Construct", "Facepunch"} )` - This will set `GM_Construct` name to `Construct` with the author as `Facepunch`.
 * `GLMVS.AddToLibrary( "gm_flatgrass", {"Flatgrass"} )` - This will set `GM_Flatgrass` name to `Flatgrass`.
 
-Notes: If you don't want to fill it then just set it to nil (without quotes). However a name MUST be placed.
+Note: If you don't want to fill it then just set it to nil (without quotes). However a name MUST be placed.
 
 
 #### ADDING THE MAP IMAGES: ####
 GLMVS has an automatic system that it will grab every map image that is added within its maplist then force the client to download them. Simply place your images on the root folder of `garrysmod/maps`. Make sure the images are sized as 150x150, png format and have the same name as the map's name. `gm_flatgrass` would translate the map image to `gm_flatgrass.png`.
 
-Notes: GLMVS will ignore non-existent map images and will replace it with a missing map icon or simply a grey square.
+Note GLMVS will ignore non-existent map images and will replace it with a missing map icon or simply a grey square.
+
+Note 2: Make sure the images are always lowercase, no matter what.
 
 
 #### UPDATE NOTIFICATOR: ####

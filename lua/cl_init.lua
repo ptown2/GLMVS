@@ -66,14 +66,15 @@ function Derma_Votemap()
 		ListItem:SetText( " " )
 		ListItem:SetTooltip( info.Description )
 		ListItem:SetDisabled( tobool( info.Locked ) )
-		ListItem.MapName = info.Name || info.Map
-		ListItem.Author = info.Author
-		ListItem.MapID = info.ID
-		ListItem.Image = util.IsValidImage( info.Map )
-		ListItem.Ticker = draw.NewTicker( 4, 2 )
-		ListItem.Think = GLMVS.GenericThink
-		ListItem.Paint = GLMVS.GenericImgButton
-		ListItem.DoClick = GLMVS.Votemap
+
+		ListItem.MapName	= info.Name || info.Map
+		ListItem.Author		= info.Author
+		ListItem.MapID		= info.ID
+		ListItem.Image		= info.Image
+		ListItem.Ticker		= draw.NewTicker( 4, 2 )
+		ListItem.Think		= GLMVS.GenericThink
+		ListItem.Paint		= GLMVS.GenericImgButton
+		ListItem.DoClick 	= GLMVS.Votemap
 	end
 
 	VoteFrame:MakePopup()

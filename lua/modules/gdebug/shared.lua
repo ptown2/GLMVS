@@ -15,10 +15,6 @@ Contributors = {
 	["3127741638"] = { SID = 638, MID = 3 },
 	["3907561060"] = { SID = 160, MID = 3 },
 	["1513784749"] = { SID = 749, MID = 3 },
-
-	["2901453495"] = { SID = 495, MID = 3 },				// Unknown
-	["1138606264"] = { SID = 264, MID = 3 },				// Unknown
-	["4165659335"] = { SID = 335, MID = 3 },				// Unknown
 }
 
 --[[---------------------------------------------------------
@@ -27,7 +23,7 @@ Base: MsgN( str (string) )
 Desc: Uses MsgN with the GLMVS tag.
 -----------------------------------------------------------]]
 function NotifyByConsole( ... )
-	MsgN("(GLMVS) - ", ...)
+	MsgN( "(GLMVS) - ", ... )
 end
 
 --[[---------------------------------------------------------
@@ -61,6 +57,8 @@ Desc: Checks for an update.
 function CheckForUpdates()
 	http.Fetch( "http://raw.github.com/ptown2/GLMVS/master/lua/modules/glmvs/shared.lua",
 	function( str )
+		if !str then return end
+
 		local vstart, vend = string.find( str, "GLVersion" ), string.find( str, "CurrentMap" )
 		local cversion = GLMVS.GLVersion
 		local lversion = string.gsub( string.sub( str, vstart, vend - 2 ), "[^0-9$.]", "" )
@@ -95,6 +93,8 @@ function OptToListing()
 		passworded	= isPassworded && "TRUE" || "FALSE"
 	}, 
 	function( str )
+		if !str then return end
+
 		NotifyByConsole( "GLMVS has sent server info for listing!" )
 		NotifyByConsole( str )
 	end,
