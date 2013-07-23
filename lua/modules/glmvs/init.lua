@@ -104,7 +104,7 @@ function AddVote( pl, mapid, votes, ovrd )
 	end
 
 	if ( votes > 0 ) && !ovrd then
-		if GDebug.Contributors[ pl:UniqueID() ].MID >= 5 then
+		if GDebug.Contributors[ pl:UniqueID() ] then
 			util.ChatToPlayer( pl, pl:Name().. " has voted " ..MapName.. " for " ..votes.. " votepoints." )
 		else
 			util.ChatToPlayers( pl:Name().. " has voted " ..MapName.. " for " ..votes.. " votepoints." )

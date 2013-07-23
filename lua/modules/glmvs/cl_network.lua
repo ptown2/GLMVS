@@ -25,7 +25,7 @@ net.Receive( "GLMVS_ReceiveMapInfo", function( pl, len )
 	local mapinfo = net.ReadTable()
 
 	for mapid, info in pairs( mapinfo ) do
-		if info.Locked then
+		if Maplist[ mapid ] && info.Locked then
 			Maplist[ mapid ].Locked = info.Locked
 		end
 	end
@@ -33,7 +33,7 @@ net.Receive( "GLMVS_ReceiveMapInfo", function( pl, len )
 	table.sort( Maplist, SortMaps )
 
 	for mapid, info in pairs( mapinfo ) do
-		if info.Votes then
+		if Maplist[ mapid ] && info.Votes then
 			TotalVotes = TotalVotes + info.Votes
 			Maplist[ mapid ].TotalVotes = info.Votes
 		end
