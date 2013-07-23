@@ -118,13 +118,20 @@ Desc: Adds a RTV Vote by the player.
 -----------------------------------------------------------]]
 function AddRTV( pl )
 	local CurGamemode = GetGamemode()
-	local rtvtimelimit = RTVWaitTime * 60 
+	local rtvcount, totalplys = 0, math.ceil( #player.GetAll() * RTVThreshold )
+	local rtvtimelimit = RTVWaitTime * 60
+
+	for _, pl in pairs( player.GetAll() ) do
+		if pl.RTVAlready then
+			rtvcount = rtvcount + 1
+		end
+	end
 
 	if !RTVMode then
 		util.ChatToPlayer( pl, "You can't RTV since the server has it disabled." )
 		return
 	elseif ( CurTime() <= rtvtimelimit ) then
-		util.ChatToPlayer( pl, "You have to wait " ..rtvtimelimit.. " minutes before doing a RTV." )
+		util.ChatToPlayer( pl, "You have to wait " ..( rtvtimelimit / 60 ).. " minutes before doing a RTV." )
 		return
 	elseif ( #player.GetAll() < 1 ) then
 		util.ChatToPlayer( pl, "You can't RTV since you're the only one." )
