@@ -44,7 +44,7 @@ end
 function RegisterCSFiles( strDirectory )
 	local filelist = GetFileList( strDirectory )
 
-	for i, filen in pairs( filelist ) do
+	for _, filen in ipairs( filelist ) do
 		local prefix = string.sub( filen, 0, 3 )
 
 		if ( IsLuaFile( filen ) ) then
@@ -60,7 +60,7 @@ end
 function RegisterLuaFiles( strDirectory )
 	local filelist = GetFileList( strDirectory )
 
-	for i, filen in ipairs( filelist ) do
+	for _, filen in ipairs( filelist ) do
 		local prefix = string.sub( filen, 0, 3 )
 
 		if ( IsLuaFile( filen ) ) then
@@ -68,7 +68,7 @@ function RegisterLuaFiles( strDirectory )
 		else
 			if !( GetFileType( filen ) == ".txt" ) then
 				RegisterLuaFiles( strDirectory.. "/" ..filen )
-				MsgN( "(GLMVS) - ", "MODULE folder ", filen, " loaded." )
+				--MsgN( "(GLMVS) - ", "MODULE folder ", filen, " loaded." )
 			end
 		end
 	end
@@ -80,12 +80,12 @@ function RegisterGamemode( tblGame )
 			GLMVS.Gamemodes[ tblGame.ID ] = tblGame
 			GLMVS.Gamemodes[ tblGame.Name ] = tblGame
 		end
-		
+
 		if CLIENT then
 			GLMVS.Gamemodes[ tblGame.ID ] = { ID = tblGame.ID, Name = tblGame.Name, MapPrefix = tblGame.MapPrefix }
 			GLMVS.Gamemodes[ tblGame.Name ] = { ID = tblGame.ID, Name = tblGame.Name, MapPrefix = tblGame.MapPrefix }
 		end
 
-		MsgN( "(GLMVS) - ", "GAMEMODE SETTING ", tblGame.Name, " loaded." )
+		--MsgN( "(GLMVS) - ", "GAMEMODE SETTING ", tblGame.Name, " loaded." )
 	end
 end

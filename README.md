@@ -69,7 +69,7 @@ GLMVS will notify the players about a new update in roll (anyone who's mentioned
 #### SERVER LISTING: ####
 GLMVS will update/list your server upon every map change (soon to be daily or so). You can opt-out via the convar `glmvs_optoutlist 1`, but leaving it opt-in would help me keep stats/control of my addon. However, GLMVS will NOT SEND crucial server information. It will only send the following information:
 * GLMVS Version
-* Enviroment Realm (IP, without port)
+* Enviroment Realm (IP and Port, for versions 1.0.2.1 and above. IP only for 1.0.2 and below)
 * Server's Current Gamemode
 * Server's Name
 * Is it Dedicated?

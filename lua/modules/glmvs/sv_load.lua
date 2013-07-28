@@ -14,7 +14,7 @@ function ManageResources()
 	resource.AddWorkshop( 160293553 )
 
 	-- Add the images
-	for _, info in pairs( Maplist ) do
+	for _, info in ipairs( Maplist ) do
 		if file.Exists( "maps/" ..info.Map.. ".png", "MOD" ) then
 			resource.AddFile( "maps/" ..info.Map.. ".png" )
 		end
@@ -30,32 +30,35 @@ function ManageMaps()
 	MapsPlayed = GFile.GetJSONFile( util.ValidVariable( GetGamemode(), "MapFileDB" ) )
 	MapCount = GFile.GetJSONFile( "mapcounts.txt" )
 
-	-- Sorty sort sort.
-	table.sort( Maplist, SortMaps )
-
 	-- Handle that shit!
-	for mapid, info in pairs( Maplist ) do
-		if IsNonExistentMap( info.Map ) then
-			Maplist[ mapid ] = nil
-			MapsPlayed[ info.Map ] = nil 
-			MapIncludes[ info.Map ] = nil
-			GDebug.NotifyByConsole( info.Map, " does not exist on the server. Client can't vote for this map." )
-		elseif !IsNonExistentMap( info.Map ) && ( MapsPlayed[ info.Map ] || ( info.Map == CurrentMap ) ) then
-			if !PLSendInfo[ mapid ] then
-				PLSendInfo[ mapid ] = {}
-			end
+	for mapid, info in ipairs( Maplist ) do
+		if !PLSendInfo[ mapid ] then
+			PLSendInfo[ mapid ] = {}
+		end
 
+		if IsNonExistentMap( info.Map ) then
+			info.Removed = 1
+			PLSendInfo[ mapid ].Removed = 1
+			GDebug.NotifyByConsole( 3, info.Map, " does not exist on the server. Client can't vote for this map." )
+		elseif !IsNonExistentMap( info.Map ) && ( MapsPlayed[ info.Map ] || ( info.Map == CurrentMap ) ) then
 			info.Locked = 1
 			PLSendInfo[ mapid ].Locked = 1
 		end
 	end
 
+	-- Sorty sort sort!
+	table.sort( Maplist, SortMaps )
+
 	-- Reset the maplock threshold before sending it. Check if the minimum of maps are there.
 	if table.Count( MapsPlayed ) >= math.floor( table.Count( Maplist ) * MapLockThreshold ) then
 		MapsPlayed = {}
-		PLSendInfo = {}
+
+		for _, sendinf in ipairs( PLSendInfo ) do
+			sendinf.Locked = 0
+		end
+
 		GFile.SetJSONFile( util.ValidVariable( GetGamemode(), "MapFileDB" ), MapsPlayed )
-		GDebug.NotifyByConsole( "Minimum locked maps requirement has been reached. Restarting the list." )
+		GDebug.NotifyByConsole( 0, "Minimum locked maps requirement has been reached. Restarting the list." )
 	end
 end
 
@@ -69,7 +72,7 @@ hook.Add( "PlayerInitialSpawn", "GLMVS_TrackSendInfo", function( pl )
 	end
 
 	-- Send the player the required info.
-	for mapid, info in pairs( Maplist ) do
+	for mapid, info in ipairs( Maplist ) do
 		if ( info.Votes > 0 ) then
 			if !PLSendInfo[ mapid ] then
 				PLSendInfo[ mapid ] = {}

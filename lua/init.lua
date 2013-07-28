@@ -44,6 +44,9 @@ function GLMVS_AddVote( pl, cmd, args )
 	if ( !MapNum || !GLMVS.Maplist[ MapNum ] ) then
 		util.ChatToPlayer( pl, "The Map 'ID' you've placed is removed, invalid or corrupted. Tell an admin." )
 		return
+	elseif GLMVS.Maplist[ MapNum ].Removed && ( GLMVS.Maplist[ MapNum ].Removed == 1 ) then
+		util.ChatToPlayer( pl, "The map you selected is actually not installed in the server." )
+		return
 	elseif GLMVS.MapsPlayed[ GLMVS.Maplist[ MapNum ].Map ] then
 		util.ChatToPlayer( pl, "That map you selected has been recently played." )
 		return
@@ -102,14 +105,14 @@ function GLMVS_EndVote()
 
 	GLMVS.AddToRecentMaps( GLMVS.CurrentMap )
 	GLMVS.CountFromMap( GLMVS.CurrentMap )
-	GDebug.NotifyByConsole( "The next map is... ", winner )
+	GDebug.NotifyByConsole( 0, "The next map is... ", winner )
 
 	RunConsoleCommand( "changelevel", winner )
 	timer.Simple( 10, function() RunConsoleCommand( "changelevel", GLMVS.CurrentMap ) end ) -- Just incase the server hangs itself.
 end
 
 -- Connect everything for GLMVS to handle.
-if ( table.Count( GLMVS.Maplist ) > 1 ) && CurGamemode then
+if CurGamemode && ( table.Count( GLMVS.Maplist ) > 1 ) then
 	CMD.AddCmdChat( "nextmap", MentionNextMap )
 	CMD.AddCmdChat( "votemap", function( pl ) pl:ConCommand("glmvs_openvote") end )
 	CMD.AddCmdChat( "glversion", function( pl ) util.ChatToPlayer( pl, "The GLMVS version this server uses is: v".. GLMVS.GLVersion ) end )
@@ -117,7 +120,7 @@ if ( table.Count( GLMVS.Maplist ) > 1 ) && CurGamemode then
 
 	CMD.AddConCmd( "glmvs_vote", GLMVS_AddVote )
 
-	hook.Add( "Initialize", "GLMVS_HookInit", GLMVS_Initialize )
+	util.ValidFunction( CurGamemode, "OnInitialize" )
 	hook.Add( "PlayerDisconnected", "GLMVS_ClearVote", GLMVS_ClearVote )
 
 	hook.Add( util.ValidVariable( CurGamemode, "HookEnd" ), "GLMVS_HookStart", GLMVS_StartVote )

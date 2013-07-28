@@ -57,24 +57,26 @@ function Derma_Votemap()
 	ListFrame:SetSpaceX( globalspacing )
 	ListFrame:SetSpaceY( globalspacing )
 
-	for mapid, info in pairs( GLMVS.Maplist ) do
-		info.NextVote = info.TotalVotes
-		info.Votes = 0
+	for mapid, info in ipairs( GLMVS.Maplist ) do
+		if !tobool( info.Removed ) then
+			info.NextVote = info.TotalVotes
+			info.Votes = 0
 
-		local ListItem = ListFrame:Add( "DButton" )
-		ListItem:SetSize( imapsize, imapsize )
-		ListItem:SetText( " " )
-		ListItem:SetTooltip( info.Description )
-		ListItem:SetDisabled( tobool( info.Locked ) )
+			local ListItem = ListFrame:Add( "DButton" )
+			ListItem:SetSize( imapsize, imapsize )
+			ListItem:SetText( " " )
+			ListItem:SetTooltip( info.Description )
+			ListItem:SetDisabled( tobool( info.Locked ) )
 
-		ListItem.MapName	= info.Name || info.Map
-		ListItem.Author		= info.Author
-		ListItem.MapID		= info.ID
-		ListItem.Image		= info.Image
-		ListItem.Ticker		= draw.NewTicker( 4, 2 )
-		ListItem.Think		= GLMVS.GenericThink
-		ListItem.Paint		= GLMVS.GenericImgButton
-		ListItem.DoClick 	= GLMVS.Votemap
+			ListItem.MapID		= mapid
+			ListItem.MapName	= info.Name || info.Map
+			ListItem.Author		= info.Author
+			ListItem.Image		= info.Image
+			ListItem.Ticker		= draw.NewTicker( 4, 2 )
+			ListItem.Think		= GLMVS.GenericThink
+			ListItem.Paint		= GLMVS.GenericImgButton
+			ListItem.DoClick 	= GLMVS.Votemap
+		end
 	end
 
 	VoteFrame:MakePopup()

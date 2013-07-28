@@ -18,7 +18,7 @@ function GetNextMap()
 	local mapwinner = nil
 	local votes = 0
 
-	for _, info in pairs( Maplist ) do
+	for _, info in ipairs( Maplist ) do
 		if ( info.Votes > votes ) then
 			votes = info.Votes
 			mapwinner = info.Map
@@ -36,8 +36,8 @@ Returns: unlockedmap (string)
 function PickUnlockedRandom()
 	local unlocked = {}
 
-	for _, info in pairs( Maplist ) do
-		if !tobool( info.Locked ) then
+	for _, info in ipairs( Maplist ) do
+		if !tobool( info.Locked ) && !tobool( info.Removed ) then
 			table.insert( unlocked, info.Map )
 		end
 	end
@@ -118,14 +118,7 @@ Desc: Adds a RTV Vote by the player.
 -----------------------------------------------------------]]
 function AddRTV( pl )
 	local CurGamemode = GetGamemode()
-	local rtvcount, totalplys = 0, math.ceil( #player.GetAll() * RTVThreshold )
 	local rtvtimelimit = RTVWaitTime * 60
-
-	for _, pl in pairs( player.GetAll() ) do
-		if pl.RTVAlready then
-			rtvcount = rtvcount + 1
-		end
-	end
 
 	if !RTVMode then
 		util.ChatToPlayer( pl, "You can't RTV since the server has it disabled." )
@@ -142,9 +135,9 @@ function AddRTV( pl )
 	end
 
 	pl.RockedAlready = true
-	util.ChatToPlayers( pl:Name().. " has decided to RTV. Requires " ..( totalplys - rtvcount ).. " more RTV votes." )
+	local rtvcount, totalplys = CheckForRTV()
 
-	CheckForRTV()
+	util.ChatToPlayers( pl:Name().. " has decided to RTV. Requires " ..( totalplys - rtvcount ).. " more RTV votes." )
 end
 
 --[[---------------------------------------------------------
@@ -165,6 +158,8 @@ function CheckForRTV()
 		OpenMapVote()
 		timer.Simple( 30, GLMVS_EndVote )
 	end
+
+	return rtvcount, totalplys
 end
 
 --[[---------------------------------------------------------

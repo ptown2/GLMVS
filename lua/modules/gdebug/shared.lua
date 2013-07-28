@@ -1,29 +1,35 @@
 --[[
-	This lua folder's purpose is to debug GLMVS, me and anyone else with debugging privileges can do this. (Admins/SuperAdmins can manage this too.
+	This lua folder's purpose is to debug GLMVS, me and anyone else with debugging privileges can do this. (Admins/SuperAdmins can manage this too, soon)
 	Please DO NOT DELETE OR MODIFY THIS FOLDER AS IT MAY BREAK THE ADDON!!!
 ]]
 
 module( "GDebug", package.seeall )
 
+ColorLevels = {
+	[0] = Color( 255, 255, 255, 255 ),
+	[1] = Color( 0, 255, 255, 255 ),
+	[2] = Color( 255, 255, 0, 255 ),
+	[3] = Color( 255, 0, 0, 255 ),
+}
+
 Contributors = {
-	["9830155"]    = { SID = 155, MID = 3 },
-	["2450936216"] = { SID = 216, MID = 5, DEV = true },
-	["3634003272"] = { SID = 272, MID = 3 },
-	["3239578655"] = { SID = 655, MID = 3 },
-	["2101885166"] = { SID = 166, MID = 3 },
-	["1224821680"] = { SID = 680, MID = 3 },
-	["3127741638"] = { SID = 638, MID = 3 },
-	["3907561060"] = { SID = 160, MID = 3 },
-	["1513784749"] = { SID = 749, MID = 3 },
+	["2450936216"] = { MID = 3, DEV = true },
+	["1061425253"] = { MID = 1.5, DEV = true },
 }
 
 --[[---------------------------------------------------------
 Name: NotifyByConsole
-Base: MsgN( str (string) )
-Desc: Uses MsgN with the GLMVS tag.
+Base: MsgC( level (int)[color], str (string) )
+Desc: Uses MsgC with the GLMVS tag and a new line.
 -----------------------------------------------------------]]
-function NotifyByConsole( ... )
-	MsgN( "(GLMVS) - ", ... )
+function NotifyByConsole( level, ... )
+	local color = ColorLevels[ level ]
+	if !color then
+		color = ColorLevels[ 0 ]
+	end
+
+	MsgC( color, "(GLMVS) - ", ... )
+	MsgN( "" )
 end
 
 --[[---------------------------------------------------------
@@ -38,16 +44,33 @@ function CompareTwoVerVals( latest, current )
 		local lver, cver = tonumber( latest[ vpos ] ) || 0, tonumber( current[ vpos ] ) || 0
 
 		if ( lver > cver ) && ( lver != cver )  then
-			NotifyByConsole( "GLMVS is out of date." )
+			NotifyByConsole( 3, "GLMVS is out of date." )
 			return false
 		elseif ( lver < cver ) && ( lver != cver ) then
-			NotifyByConsole( "GLMVS is up to date." )
+			NotifyByConsole( 1, "GLMVS is up to date." )
 			return true
 		end
 	end
 
-	NotifyByConsole( "GLMVS is up to date." )
+	NotifyByConsole( 1, "GLMVS is up to date." )
 	return true
+end
+
+--[[---------------------------------------------------------
+Name: GetServerIP()
+Desc: Gets the real IP with port of the server.
+Returns: serverIP (string, formatted)
+-----------------------------------------------------------]]
+function GetServerIP()
+	local hostIP = GetConVarString( "hostip" )
+	local IPTable = {
+		[1] = bit.band( bit.rshift( hostIP, 24 ), 0x000000FF ),
+		[2] = bit.band( bit.rshift( hostIP, 16 ), 0x000000FF ),
+		[3] = bit.band( bit.rshift( hostIP, 8 ), 0x000000FF ),
+		[4] = bit.band( hostIP, 0x000000FF )
+	}
+
+	return string.format( "%d.%d.%d.%d:%s", IPTable[1], IPTable[2], IPTable[3], IPTable[4], GetConVarString( "hostport" ) )
 end
 
 --[[---------------------------------------------------------
@@ -63,7 +86,7 @@ function CheckForUpdates()
 		local cversion = GLMVS.GLVersion
 		local lversion = string.gsub( string.sub( str, vstart, vend - 2 ), "[^0-9$.]", "" )
 
-		NotifyByConsole( "Current Version: ", cversion, " -- Latest Version: ", lversion )
+		NotifyByConsole( 1, "Current Version: ", cversion, " -- Latest Version: ", lversion )
 
 		cversion = string.Explode( ".", GLMVS.GLVersion, false )
 		lversion = string.Explode( ".", lversion, false )
@@ -71,7 +94,7 @@ function CheckForUpdates()
 		GLMVS.UpToDate = CompareTwoVerVals( lversion, cversion )
 	end,
 	function()
-		NotifyByConsole( "Failed to retrieve current version." )
+		NotifyByConsole( 3, "Failed to retrieve current version." )
 	end )
 end
 
@@ -86,20 +109,21 @@ function OptToListing()
 	local gamemodename = GetConVarString("gamemode")
 
 	http.Post( "http://ptown2.0fees.net/glmvsreport.php", {
+		serverip	= GetServerIP(),
+		servername	= GetHostName(),
 		gmname		= gamemodename || "None",
 		version		= GLMVS.GLVersion,
-		servername	= GetHostName(),
 		dedicated	= game.IsDedicated() && "TRUE" || "FALSE",
 		passworded	= isPassworded && "TRUE" || "FALSE"
 	}, 
 	function( str )
 		if !str then return end
 
-		NotifyByConsole( "GLMVS has sent server info for listing!" )
-		NotifyByConsole( str )
+		NotifyByConsole( 1, "GLMVS has sent server info for listing!" )
+		NotifyByConsole( 1, str )
 	end,
 	function()
-		NotifyByConsole( "Failed to send server info." )
+		NotifyByConsole( 3, "Failed to send server info." )
 	end )
 end
 
@@ -108,7 +132,20 @@ Name: PrintResults
 Desc: Debugging
 -----------------------------------------------------------]]
 function PrintResults()
-	NotifyByConsole( "GLMVS Add-on v", GLMVS.GLVersion, " has loaded successfully." )
-	NotifyByConsole( table.Count( GLMVS.Maplist ), " maps are now loaded!" )
-	NotifyByConsole( table.Count( GLMVS.Gamemodes ) / 2, " gamemode settings are now loaded!" )
+	NotifyByConsole( 1, "GLMVS Add-on v", GLMVS.GLVersion, " has loaded successfully." )
+	NotifyByConsole( 1, table.Count( GLMVS.Maplist ), " Maps are now loaded!" )
+	NotifyByConsole( 1, table.Count( GLMVS.Gamemodes ) / 2, " Gamemode Settings are now loaded!" )
 end
+
+--[[---------------------------------------------------------
+Name: PrintMapTable
+Desc: Debugging
+-----------------------------------------------------------]]
+function PrintMapTable( pl )
+	if SERVER then return end
+	if !pl:IsPlayer() then return end
+	if !Contributors[ pl:UniqueID() ] then return end
+	
+	PrintTable( GLMVS.Maplist )
+end
+concommand.Add( "glmvs_printmaps", PrintMapTable )

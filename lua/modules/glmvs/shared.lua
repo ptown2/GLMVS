@@ -7,7 +7,7 @@ MapIncludes		= {}
 Gamemodes		= {}
 
 -- Shared Setting Vars
-GLVersion		= "1.0.2"
+GLVersion		= "1.0.2.1"
 CurrentMap		= string.lower( game.GetMap() )
 
 NotifyUsergroup	= {
@@ -23,27 +23,32 @@ Desc: Adds a map shared-like for both client and server.
 -----------------------------------------------------------]]
 function AddMap( map, plnum )
 	local CurGamemode = GetGamemode()
-	local mapLibrary = Maplib[ map ] || {}
+	local MapName = string.lower( map )
+	local MapLibrary = Maplib[ MapName ] || {}
 
 	-- Do some checks and shit.
-	if MapIncludes[ map ] then
-		GDebug.NotifyByConsole( map, " is already added! Not included." )
+	if MapIncludes[ MapName ] then
+		GDebug.NotifyByConsole( 2, MapName, " is already added! Not included." )
 		return
-	elseif CurGamemode && !AllowNonGMRelatedMaps && !table.HasValue( CurGamemode.MapPrefix, string.Explode( "_", map )[1] ) then
-		GDebug.NotifyByConsole( map, " isn't part of this gamemode. Not listed." )
+	elseif CurGamemode && !AllowNonGMRelatedMaps && !table.HasValue( CurGamemode.MapPrefix, string.Explode( "_", MapName )[1] ) then
+		GDebug.NotifyByConsole( 2, MapName, " isn't part of this gamemode. Not listed." )
 		return
 	end
 
 	-- Now add the map SHARED-ey
 	if SERVER then
 		table.insert( Maplist, {
-			Map = string.lower( map ), Votes = 0, Name = mapLibrary.Name || nil, MinPlayers = plnum, Locked = 0
+			Map = string.lower( MapName ), Votes = 0,
+			Name = MapLibrary.Name || nil,
+			MinPlayers = plnum, Locked = 0, Removed = 0
 		} )
 	end
 
 	if CLIENT then
 		table.insert( Maplist, {
-			Map = string.lower( map ), Votes = 0, Name = mapLibrary.Name || nil, Author = mapLibrary.Author || nil, Description = mapLibrary.Description || nil, MinPlayers = plnum, Locked = 0
+			Map = string.lower( MapName ), Votes = 0, TotalVotes = 0, NextVote = 0,
+			Name = MapLibrary.Name || nil, Author = MapLibrary.Author || nil, Description = MapLibrary.Description || nil, MinPlayers = plnum,
+			Image = Material( util.IsValidImage( MapName ), "nocull" ), Locked = 0, Removed = 0
 		} )
 	end
 
@@ -55,8 +60,8 @@ Name: AddToLibrary( map (string), { realname (string), author (string), descript
 Desc: Adds a map to the library.
 -----------------------------------------------------------]]
 function AddToLibrary( mlib, infolib )
-	if !istable(infolib) then GDebug.NotifyByConsole( mlib, " doesn't have it as a table entry! Remove from the library!" ) return end
-	if !infolib[1] then GDebug.NotifyByConsole( mlib, " doesn't have a name entry in the table! Remove from the library!" ) return end
+	if !istable(infolib) then GDebug.NotifyByConsole( 3, mlib, " doesn't have it as a table entry! Remove from the library!" ) return end
+	if !infolib[1] then GDebug.NotifyByConsole( 3, mlib, " doesn't have a name entry in the table! Remove from the library!" ) return end
 
 	if SERVER then
 		Maplib[ mlib ] = {
@@ -83,6 +88,10 @@ function SortMaps(a, b)
 
 	local aname = string.lower( a.Name || a.Map )
 	local bname = string.lower( b.Name || b.Map )
+
+	if ( a.Removed ~= b.Removed ) then
+		return a.Removed < b.Removed
+	end
 
 	if ( a.Locked ~= b.Locked ) then
 		return a.Locked < b.Locked
