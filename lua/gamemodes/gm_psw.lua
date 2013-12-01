@@ -1,14 +1,12 @@
 local GAME = {}
 
-GAME.ID			= "stalker"
-GAME.Name		= "The Stalker"
-GAME.MapPrefix	= {"ts"}
-GAME.MapFileDB	= "map_stalker.txt"
-
-GAME.HookRound	= "LoadNextMap"
+GAME.ID			= "pirateshipwars"
+GAME.Name		= "Pirate Ship Wars"
+GAME.MapPrefix	= {"psw"}
+GAME.MapFileDB	= "map_psw.txt"
 
 function GAME:OnInitialize()
-	function GAMEMODE:LoadNextMap() return end
+	function UMS_MapCycle.DoNextMap() GLMVS_StartVote() end
 end
 
 function GAME:GetEndTime()
@@ -16,7 +14,7 @@ function GAME:GetEndTime()
 end
 
 function GAME:GetPlayerVote( pl )
-	return math.ceil( pl:Frags() * 1.5 )
+	return math.ceil( pl:Frags() / 2 )
 end
 
 function GAME:OnStartVote()

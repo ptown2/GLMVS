@@ -1,6 +1,6 @@
 /* --------------------------------------------------------------------------
     GLMVS - Globalized Map Voting System
-    Copyright (C) 2012  Robert Lind (ptown2)
+    Copyright (C) 2012-2014  Robert Lind (ptown2)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,9 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------- */
 
-local CurGamemode = GLMVS.GetGamemode()
-local EndHookCalled = false
-
 local function MentionNextMap( pl )
 	local winner, votes = GLMVS.GetNextMap()
 
@@ -29,34 +26,42 @@ local function MentionNextMap( pl )
 	util.ChatToPlayers( pl:Name().. ", the next map is " ..winner )
 end
 
+
 function GLMVS_Initialize()
-	util.ValidFunction( CurGamemode, "OnInitialize" )
+	GLMVS.CallSettingFunction( "OnInitialize" )
+end
+
+function GLMVS_InitPostEntity()
+	GLMVS.EndHookCalled = false
+	GLMVS.CallSettingFunction( "OnInitPostEntity" )
 end
 
 function GLMVS_AddVote( pl, cmd, args )
-	if !pl:IsPlayer() then return end
+	if not pl:IsPlayer() then return end
 
-	local MapNum = tonumber( args[ 1 ] )
-	local MID = GDebug.Contributors[ pl:UniqueID() ] && GDebug.Contributors[ pl:UniqueID() ].MID || 1
-	local UGM = 1
-	local CurVotePower = GLMVS.GetPlayerVotePower( pl ) * MID * UGM
+	local MapNum, PReqMult = tonumber( args[ 1 ] ), math.max( 0, ( GLMVS.TrueCountMapList - GLMVS.CountMapsPlayed ) / GLMVS.TrueCountMapList )
+	local MID, GID = GDebug.Contributors[ pl:UniqueID() ] and GDebug.Contributors[ pl:UniqueID() ].MID or 1, GLMVS.GetGroupMultiplier( pl )
+	local CurVotePower = GLMVS.GetPlayerVotePower( pl ) * GID * MID
 
-	if ( !MapNum || !GLMVS.Maplist[ MapNum ] ) then
+	-- Return any issue given by the votemap system.
+	if ( not MapNum or not GLMVS.MapList[ MapNum ] ) then
 		util.ChatToPlayer( pl, "The Map 'ID' you've placed is removed, invalid or corrupted. Tell an admin." )
 		return
-	elseif GLMVS.Maplist[ MapNum ].Removed && ( GLMVS.Maplist[ MapNum ].Removed == 1 ) then
+	elseif GLMVS.MapList[ MapNum ].Removed and ( GLMVS.MapList[ MapNum ].Removed == 1 ) then
 		util.ChatToPlayer( pl, "The map you selected is actually not installed in the server." )
 		return
-	elseif GLMVS.MapsPlayed[ GLMVS.Maplist[ MapNum ].Map ] then
+	elseif GLMVS.MapsPlayed[ GLMVS.MapList[ MapNum ].Map ] then
 		util.ChatToPlayer( pl, "That map you selected has been recently played." )
 		return
-	elseif ( GLMVS.Maplist[ MapNum ].Map == GLMVS.CurrentMap ) then
-		util.ChatToPlayer( pl, "You cannot vote for the map that you're currently playing on." )
+	elseif ( GLMVS.MapList[ MapNum ].Map == GLMVS.CurrentMap ) then
+		util.ChatToPlayer( pl, "You can't vote for the map that you're currently playing on." )
 		return
-	elseif GLMVS.Maplist[ MapNum ].MinPlayers && ( GLMVS.Maplist[ MapNum ].MinPlayers > GLMVS.MaxPlayerCount ) then
-		util.ChatToPlayer( pl, "That map you selected requires " ..GLMVS.Maplist[ MapNum ].MinPlayers.. " or more players." )
+	elseif GLMVS.MapList[ MapNum ].MinPlayers and ( math.floor( GLMVS.MapList[ MapNum ].MinPlayers * PReqMult ) > GLMVS.MaxPlayerCount ) then
+		util.ChatToPlayer( pl, "That map you selected requires " ..math.floor( GLMVS.MapList[ MapNum ].MinPlayers * PReqMult ).. " or more players." )
 		return
 	end
+
+	MsgN( GLMVS.MapList[ MapNum ].MinPlayers , PReqMult )
 
 	-- They already voted the same map? Just update!
 	if ( pl.VotedAlready == MapNum ) then
@@ -64,7 +69,6 @@ function GLMVS_AddVote( pl, cmd, args )
 			local PowerUpdate = math.abs( CurVotePower - pl.VotePower )
 			GLMVS.AddVote( pl, pl.VotedAlready, PowerUpdate, CurVotePower )
 		end
-
 		return
 	end
 
@@ -77,7 +81,7 @@ function GLMVS_AddVote( pl, cmd, args )
 end
 
 function GLMVS_ClearVote( pl )
-	if ( pl.VotedAlready && !GDebug.Contributors[ pl:UniqueID() ] ) then
+	if ( pl.VotedAlready and not GDebug.Contributors[ pl:UniqueID() ] ) then
 		GLMVS.AddVote( pl, pl.VotedAlready, -pl.VotePower )
 	end
 
@@ -85,14 +89,25 @@ function GLMVS_ClearVote( pl )
 	GLMVS.CheckForRTV()
 end
 
-function GLMVS_StartVote()
-	if EndHookCalled then return end
-	if util.ValidFunction( CurGamemode, "ShouldRestartRound" ) then return end
+function GLMVS_StartVote( ... )
+	if GLMVS.EndHookCalled then return end
+	if GLMVS.CallSettingFunction( "ShouldRestartRound", unpack( { ... } ) ) then return end
 
-	EndHookCalled = true
-	util.ValidFunction( CurGamemode, "OnStartVote" )
+	GLMVS.EndHookCalled = true
+	GLMVS.CallSettingFunction( "OnStartVote" )
 
-	timer.Simple( math.floor( ( ( util.ValidFunction( CurGamemode, "GetEndTime" ) || 0 ) * 0.15 ) ), function()
+	timer.Simple( math.floor( ( ( GLMVS.CallSettingFunction( "GetEndTime" ) or 0 ) * 0.15 ) ), function()
+		GLMVS.OpenMapVote()
+	end )
+end
+
+function GLMVS_ForcedStartVote()
+	if GLMVS.EndHookCalled then return end
+
+	GLMVS.EndHookCalled = true
+	GLMVS.CallSettingFunction( "OnStartVote" )
+
+	timer.Simple( math.floor( ( ( GLMVS.CallSettingFunction( "GetEndTime" ) or 0 ) * 0.15 ) ), function()
 		GLMVS.OpenMapVote()
 	end )
 end
@@ -103,8 +118,6 @@ function GLMVS_EndVote()
 		winner = GLMVS.PickUnlockedRandom()
 	end
 
-	GLMVS.AddToRecentMaps( GLMVS.CurrentMap )
-	GLMVS.CountFromMap( GLMVS.CurrentMap )
 	GDebug.NotifyByConsole( 0, "The next map is... ", winner )
 
 	RunConsoleCommand( "changelevel", winner )
@@ -112,7 +125,7 @@ function GLMVS_EndVote()
 end
 
 -- Connect everything for GLMVS to handle.
-if CurGamemode && ( table.Count( GLMVS.Maplist ) > 1 ) then
+if ( table.Count( GLMVS.MapList ) > 1 ) then
 	CMD.AddCmdChat( "nextmap", MentionNextMap )
 	CMD.AddCmdChat( "votemap", function( pl ) pl:ConCommand("glmvs_openvote") end )
 	CMD.AddCmdChat( "glversion", function( pl ) util.ChatToPlayer( pl, "The GLMVS version this server uses is: v".. GLMVS.GLVersion ) end )
@@ -120,9 +133,11 @@ if CurGamemode && ( table.Count( GLMVS.Maplist ) > 1 ) then
 
 	CMD.AddConCmd( "glmvs_vote", GLMVS_AddVote )
 
-	util.ValidFunction( CurGamemode, "OnInitialize" )
+	GLMVS_Initialize()
+
+	hook.Add( "InitPostEntity", "GLMVS_InitPostEntity", GLMVS_InitPostEntity )
 	hook.Add( "PlayerDisconnected", "GLMVS_ClearVote", GLMVS_ClearVote )
 
-	hook.Add( util.ValidVariable( CurGamemode, "HookEnd" ), "GLMVS_HookStart", GLMVS_StartVote )
-	hook.Add( util.ValidVariable( CurGamemode, "HookMap" ), "GLMVS_HookEnd", GLMVS_EndVote )
+	hook.Add( GLMVS.ReturnSettingVariable( "HookRound" ), "GLMVS_HookRound", GLMVS_StartVote )
+	hook.Add( GLMVS.ReturnSettingVariable( "HookPostRound" ), "GLMVS_HookPostRound", GLMVS_EndVote )
 end

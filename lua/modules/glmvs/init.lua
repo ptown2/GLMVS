@@ -1,13 +1,17 @@
 module( "GLMVS", package.seeall )
 
 -- Server Global Vars
-MapCount		= {}
-MapsPlayed		= {}
-MaxPlayerCount	= 0
-UpToDate		= true
+MapCount			= {}
+MapsPlayed			= {}
+MaxPlayerCount		= 0
+CountMapsPlayed		= 0
+CountMapList		= 0
+TrueCountMapList	= 0
+UpToDate			= true
+EndHookCalled		= false
 
 -- Player Send Vars
-PLSendInfo		= {}
+PLSendInfo			= {}
 
 --[[---------------------------------------------------------
 Name: GetNextMap
@@ -18,7 +22,7 @@ function GetNextMap()
 	local mapwinner = nil
 	local votes = 0
 
-	for _, info in ipairs( Maplist ) do
+	for _, info in ipairs( MapList ) do
 		if ( info.Votes > votes ) then
 			votes = info.Votes
 			mapwinner = info.Map
@@ -36,8 +40,8 @@ Returns: unlockedmap (string)
 function PickUnlockedRandom()
 	local unlocked = {}
 
-	for _, info in ipairs( Maplist ) do
-		if !tobool( info.Locked ) && !tobool( info.Removed ) then
+	for _, info in ipairs( MapList ) do
+		if not tobool( info.Locked ) and not tobool( info.Removed ) then
 			table.insert( unlocked, info.Map )
 		end
 	end
@@ -51,7 +55,7 @@ Desc: Finds if the map exists or not.
 Returns: inversedFileExists (bool)
 -----------------------------------------------------------]]
 function IsNonExistentMap( map )
-	return !file.Exists( "maps/" ..map.. ".bsp", "MOD" )
+	return not file.Exists( "maps/" ..map.. ".bsp", "MOD" )
 end
 
 --[[---------------------------------------------------------
@@ -59,18 +63,18 @@ Name: AddToRecentMaps( map (string) )
 Desc: Adds the map to the recently played maps data.
 -----------------------------------------------------------]]
 function AddToRecentMaps( map )
-	if ( !MapIncludes[ map ] || MapsPlayed[ map ] ) then return end
+	if ( not MapIncludes[ map ] or MapsPlayed[ map ] ) then return end
 
 	MapsPlayed[ map ] = true
-	GFile.SetJSONFile( util.ValidVariable( GetGamemode(), "MapFileDB" ), MapsPlayed )
+	GFile.SetJSONFile( ReturnSettingVariable( "MapFileDB" ), MapsPlayed )
 end
 
 --[[---------------------------------------------------------
 Name: CountFromMap( map (string) )
-Desc: Counts the times this map has been played.
+Desc: Sets the count ONCE the times this map has been played.
 -----------------------------------------------------------]]
 function CountFromMap( map )
-	if ( !MapCount[ map ] ) then
+	if ( not MapCount[ map ] ) then
 		MapCount[ map ] = 0
 	end
 
@@ -83,17 +87,19 @@ Name: AddVote( pl (player entity), mapid(int), votes(int) )
 Desc: Adds the vote to the selected map.
 -----------------------------------------------------------]]
 function AddVote( pl, mapid, votes, ovrd )
-	if ( MVotePower > 0 ) && ( votes > MVotePower ) && !GDebug.Contributors[ pl:UniqueID() ] then
+	if ( MVotePower > 0 ) and ( votes > MVotePower ) and not GDebug.Contributors[ pl:UniqueID() ] then
 		votes = MVotePower
 	end
 
-	local MapName = GLMVS.Maplist[ mapid ].Name || GLMVS.Maplist[ mapid ].Map
+	local MapName = MapList[ mapid ].Name or MapList[ mapid ].Map
 
-	Maplist[ mapid ].Votes = Maplist[ mapid ].Votes + votes
+	MapList[ mapid ].Votes = MapList[ mapid ].Votes + votes
 
 	net.Start( "GLMVS_ReceiveVotes" )
-		net.WriteInt( mapid, 32 )
+		net.WriteUInt( mapid, 32 )
+		net.WriteUInt( pl:EntIndex(), 16 )
 		net.WriteInt( votes, 32 )
+		net.WriteInt( ovrd or 0, 32 )
 	net.Broadcast()
 
 	pl.VotedAlready = mapid
@@ -102,14 +108,6 @@ function AddVote( pl, mapid, votes, ovrd )
 	if ovrd then
 		pl.VotePower = ovrd
 	end
-
-	if ( votes > 0 ) && !ovrd then
-		if GDebug.Contributors[ pl:UniqueID() ] then
-			util.ChatToPlayer( pl, pl:Name().. " has voted " ..MapName.. " for " ..votes.. " votepoints." )
-		else
-			util.ChatToPlayers( pl:Name().. " has voted " ..MapName.. " for " ..votes.. " votepoints." )
-		end
-	end
 end
 
 --[[---------------------------------------------------------
@@ -117,27 +115,37 @@ Name: AddRTV( pl (player entity) )
 Desc: Adds a RTV Vote by the player.
 -----------------------------------------------------------]]
 function AddRTV( pl )
-	local CurGamemode = GetGamemode()
 	local rtvtimelimit = RTVWaitTime * 60
+	local canrtv, reason = CallSettingFunction( "CanPlayerRTV", pl )
 
-	if !RTVMode then
+	if ( canrtv == nil ) and not ( canrtv == false ) then
+		canrtv, reason = true, ""
+	end
+
+	if not RTVMode then
 		util.ChatToPlayer( pl, "You can't RTV since the server has it disabled." )
 		return
-	elseif ( CurTime() <= rtvtimelimit ) then
-		util.ChatToPlayer( pl, "You have to wait " ..( rtvtimelimit / 60 ).. " minutes before doing a RTV." )
-		return
-	elseif ( #player.GetAll() < 1 ) then
-		util.ChatToPlayer( pl, "You can't RTV since you're the only one." )
+	elseif EndHookCalled then
+		util.ChatToPlayer( pl, "You can't RTV since the game ended." )
 		return
 	elseif pl.RockedAlready then
 		util.ChatToPlayer( pl, "You can't RTV since you already did it." )
 		return
+	elseif ( #player.GetAll() < RTVPlayerREQ ) then
+		util.ChatToPlayer( pl, "You can't RTV since it requires " ..RTVPlayerREQ.. " or more player(s)." )
+		return
+	elseif ( CurTime() < rtvtimelimit ) then
+		util.ChatToPlayer( pl, "You have to wait " ..( rtvtimelimit / 60 ).. " minutes before doing a RTV." )
+		return
+	elseif not canrtv then
+		util.ChatToPlayer( pl, reason )
+		return
 	end
 
 	pl.RockedAlready = true
-	local rtvcount, totalplys = CheckForRTV()
 
-	util.ChatToPlayers( pl:Name().. " has decided to RTV. Requires " ..( totalplys - rtvcount ).. " more RTV votes." )
+	local rtvcount, totalplys = CheckForRTV()
+	util.ChatToPlayers( pl:Name().. " has decided to RTV. Requires " ..( totalplys - rtvcount ).. " more RTV votes. Type /rtv to vote!" )
 end
 
 --[[---------------------------------------------------------
@@ -145,18 +153,24 @@ Name: CheckForRTV
 Desc: Checks if a RTV is going to be made.
 -----------------------------------------------------------]]
 function CheckForRTV()
-	local rtvcount, totalplys = 0, math.ceil( #player.GetAll() * RTVThreshold )
+	local rtvcount, totalplys = 0, math.ceil( #player.GetAll() * math.max( 0, math.min( 1, RTVThreshold ) ) )
 
 	for _, pl in pairs( player.GetAll() ) do
-		if pl.RTVAlready then
+		if pl.RockedAlready then
 			rtvcount = rtvcount + 1
 		end
 	end
 
-	if ( rtvcount >= totalplys ) then
-		util.ChatToPlayers( "Limit reached to RTV. Changing the map in 30 seconds." )
-		OpenMapVote()
-		timer.Simple( 30, GLMVS_EndVote )
+	MsgN( rtvcount, totalplys )
+	if ( rtvcount >= totalplys ) and not EndHookCalled then
+		-- Make it slightly late for the message.
+		timer.Simple( 0.25, function()
+			local timeleft = CallSettingFunction( "GetEndTime" ) or 30
+
+			CallSettingFunction( "OnRTVSuccess" )
+			util.ChatToPlayers( "Limit reached to RTV. Changing the map in ".. timeleft .." seconds." )
+			GLMVS_ForcedStartVote()
+		end )
 	end
 
 	return rtvcount, totalplys
@@ -164,11 +178,11 @@ end
 
 --[[---------------------------------------------------------
 Name: GetPlayerVotePower( pl (player entity) )
-Desc: Finds then reads the JSON set text file under GLMVSData folder.
+Desc: Calculates the votepower of the said player.
 Returns: votepower (int)
 -----------------------------------------------------------]]
 function GetPlayerVotePower( pl )
-	return math.max( SVotePower, math.ceil( ( util.ValidFunction( GetGamemode(), "GetPlayerVote", pl ) || 0 ) ) )
+	return math.ceil( math.max( SVotePower, CallSettingFunction( "GetPlayerVote", pl ) or 0 ) )
 end
 
 --[[---------------------------------------------------------
@@ -177,6 +191,6 @@ Desc: Forces everyone to run the glmvs_openvote concomamnd.
 -----------------------------------------------------------]]
 function OpenMapVote()
 	for _, pl in pairs( player.GetAll() ) do
-		pl:ConCommand("glmvs_openvote")
+		pl:ConCommand( "glmvs_openvote" )
 	end
 end

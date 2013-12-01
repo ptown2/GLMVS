@@ -2,7 +2,7 @@
 	Autorun that shit
 ---------------------------------------- */
 if SERVER then
-	AddCSLuaFile( )
+	AddCSLuaFile()
 	AddCSLuaFile( "fileload.lua" )
 end
 
@@ -10,20 +10,20 @@ include( "fileload.lua" )
 
 
 /* ----------------------------------------
-	AddCSLua all of the lua folders
+	AddCSLua all of the lua folders/files.
 ---------------------------------------- */
 if SERVER then
-	AddCSLuaFile( "cl_init.lua" )
 	AddCSLuaFile( "addmaps.lua" )
 	AddCSLuaFile( "maplibrary.lua" )
 
 	GLoader.RegisterCSFiles( "modules" )
 	GLoader.RegisterCSFiles( "gamemodes" )
+	GLoader.RegisterCSFiles( "vgui" )
 end
 
 
 /* ----------------------------------------
-	Include all of the modules and gamemodes
+	Include the rest of the addon.
 ---------------------------------------- */
 GLoader.RegisterLuaFiles( "modules" )
 GLoader.RegisterLuaFiles( "gamemodes" )
@@ -44,12 +44,29 @@ hook.Add( "Initialize", "GLMVS_LoadEverything", function()
 		GLMVS.ManageMaps()
 
 		-- Run the debugging functions.
-		GDebug.PrintResults()
 		GDebug.CheckForUpdates()
 		GDebug.OptToListing()
+
+		-- Count the map early.
+		GLMVS.AddToRecentMaps( GLMVS.CurrentMap )
+		GLMVS.CountFromMap( GLMVS.CurrentMap )
 	end
 
 	if CLIENT then
-		include( "cl_init.lua" )
+		local folderpack = GLMVS.ReturnSettingVariable( "DermaPack" ) or ""
+		local folderlayout = GLMVS.ReturnSettingVariable( "DermaLayout" ) or ""
+
+		GLoader.RegisterLuaFiles( "vgui", true )
+
+		if ( folderpack and folderlayout ) and ( folderpack ~= "" ) and ( folderlayout ~= "" ) then
+			GLoader.RegisterLuaFiles( "vgui/".. string.lower( folderpack ), true )
+		else
+			GLoader.RegisterLuaFiles( "vgui/pack_default", true )
+		end
+
+		CMD.AddConCmd( "glmvs_openvote", _G[ "GLMVS_VoteMap_Menu" ] )
 	end
+
+	-- Print-out the results.
+	GDebug.PrintResults()
 end )

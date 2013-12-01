@@ -23,6 +23,6 @@
 ---------------------------------------------------------------------------------------- */
 
 -- Use this as example.
-GLMVS.AddMap( "ze_minecraft_v1_1", 2 )
+GLMVS.AddMap( "ze_minecraft_v1_1" )
 GLMVS.AddMap( "zs_asylum_reborn_b2" )
 GLMVS.AddMap( "zs_canyon" )

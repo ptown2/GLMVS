@@ -215,7 +215,8 @@ pip-log.txt
 .mr.developer.cfg
 
 # Custom TXT Shit #
-lua/gamemodes/gm_eft.lua
+lua/addmaps.lua
+lua/maplibrary.lua
 noticesandstuff.txt
 thread.txt
 maplist.txt

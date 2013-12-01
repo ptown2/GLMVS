@@ -3,7 +3,7 @@ module( "draw", package.seeall )
 --[[---------------------------------------------------------
 Name: draw.NewTicker( x, y, delay )
 Desc: Creates a new ticker element. Draw using draw.TickerText
-Warning! Do not call this every frame! This is for draw.TickerText management.
+Warning!  Do not call this every frame!  This is for draw.TickerText management.
 -----------------------------------------------------------]]
 function NewTicker( x, y, delay )
 	return {
@@ -18,7 +18,8 @@ end
 --[[---------------------------------------------------------
 Name: draw.TickerText( text, font, color, ticker, width, speed, delay )
 Desc: Draws a marquee like text in a specified width.
-Usage: local ticker = draw.NewTicker( 10, 10 )
+Usage:
+local ticker = draw.NewTicker( 10, 10 )
 draw.TickerText( "ticker!", "font", color_white, ticker, 150, 10, 2 )
 -----------------------------------------------------------]]
 function TickerText( text, font, color, ticker, width, speed, delay )
@@ -34,7 +35,7 @@ function TickerText( text, font, color, ticker, width, speed, delay )
 			if ticker.dir == 1 then //Right
 				local pos = width - w - 2
 
-				if ticker.x != pos then
+				if ticker.x ~= pos then
 					ticker.x = math.Approach( ticker.x, pos, FrameTime() * ( speed or 10 ) )
 				else
 					ticker.dir = 0
@@ -43,7 +44,7 @@ function TickerText( text, font, color, ticker, width, speed, delay )
 			else //Left
 				local pos = ticker.origin
 
-				if ticker.x != pos then
+				if ticker.x ~= pos then
 					ticker.x = math.Approach( ticker.x, pos, FrameTime() * ( speed or 10 ) )
 				else
 					ticker.dir = 1

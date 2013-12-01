@@ -20,6 +20,6 @@
 ---------------------------------------------------------------------------------------- */
 
 -- Use this as example.
-GLMVS.AddToLibrary( "ze_minecraft_v1_1", { "ZE Minecraft" } )
-GLMVS.AddToLibrary( "zs_asylum_reborn_b2", { "Asylum Reborn" } )
-GLMVS.AddToLibrary( "zs_canyon", { "Canyon" } )
+GLMVS.AddToLibrary( "ze_minecraft_v1_1", 4, { "ZE Minecraft" } )
+GLMVS.AddToLibrary( "zs_asylum_reborn_b2", 0, { "Asylum Reborn" } )
+GLMVS.AddToLibrary( "zs_canyon", 0, { "Canyon" } )

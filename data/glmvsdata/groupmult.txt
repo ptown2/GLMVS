@@ -1,0 +1,1 @@
+{"donator":"1.25","moderator":"1.5","superadmin":"2"}
