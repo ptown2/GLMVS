@@ -14,10 +14,15 @@ end
 
 GAME.ZombieBonusTime = 0
 GAME.RoundPlay = 0
+
 function GAME:OnInitPostEntity()
 	self.ZombieBonusTime = CurTime() + GAMEMODE.WaveZeroLength + 1250
 	self.RoundPlay = self.RoundPlay + 1
 end
+
+hook.Add( "RestartRound", "GLMVS_RoundCounter", function()
+  GAME.RoundPlay = GAME.RoundPlay + 1
+end )
 
 function GAME:GetEndTime()
 	return GAMEMODE.EndGameTime
